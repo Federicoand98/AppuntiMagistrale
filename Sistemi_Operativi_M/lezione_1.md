@@ -3,7 +3,7 @@
 
 
 
-Virtualizzare un sistema (hardware e software) significa presentare all'uilizzatore una visione 
+Virtualizzare un sistema (hardware e software) significa presentare all'utilizzatore una visione 
 delle risorse del sistema diversa da quella reale.
 
 Ciò è possibile introducendo un **livello di indirezione** tra la vista logica e quella fisica delle 
