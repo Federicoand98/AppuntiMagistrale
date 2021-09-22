@@ -1,111 +1,81 @@
-\documentclass[a4paper, 11pt, twoside, openright]{book}
+\documentclass{article}
 \usepackage[utf8]{inputenc}
-\usepackage[english, italian]{babel}
-\usepackage[T1]{fontenc}
-\usepackage{lettrine}
-\usepackage[autostyle, italian=guillemets]{csquotes}
-\usepackage{acronym}
-\usepackage{listings}
-\usepackage[bibstyle=numeric, citestyle=numeric, backend=biber]{biblatex}
-\usepackage{graphicx, wrapfig}
-\usepackage[usenames,dvipsnames,svgnames,table]{xcolor}
-\usepackage{minitoc}
-\usepackage{subcaption} 
-\usepackage{hyperref}
 
-\title{Sistemi-Operativi-M}
-\author{Federico Andrucci}
+\title{proca}
+\author{fede andrucci}
 \date{September 2021}
 
 \begin{document}
+
 \maketitle
 \tableofcontents
 
-\chapter{Virtualizzazione}
-\section{Introduzione}
+\section{Virtualizzazione}
 
 Virtualizzare un sistema (hardware e software) significa presentare all'uilizzatore una visione delle risorse del sistema diversa da quella reale.
-
 Ciò è possibile introducendo un \textbf{livello di indirezione} tra la vista logica e quella fisica delle risorse.
 
 Quindi l'obiettivo della virtualizzazione è quello di disaccoppiare il comportamento delle risorsedi un calcolatore dalla loro realizzazione fisica. 
-Quindi apparendo diverse da quelle effettive della macchina.
-
-Il software che si occupa di virtualizzare in parole semplici divide le risorse reali nel numero di macchine virtuali necessarie. 
+Quindi apparendo diverse da quelle effettive della macchina. Il software che si occupa di virtualizzare in parole semplici divide le risorse reali nel numero di macchine virtuali necessarie. 
 Quindi ogni macchina virtuale avrà la sua CPU, GPU, RAM, ecc...
 
-Esmpi di virtualizzazione
-\begin{lstlisting}
-    \item \textbf{Virtualizzazione a livello di processo:} i sistemi multitasking permettono l'esecuzione 
-    contemporanea di più processi, ognuno dei quale dispone di una macchina virtuale dedicata. Questo
-    tipo di virtualizzazione viene realizzata dal kernel del sistema operativo.
-    \item \textbf{Virtualizzazione della memoria:} in presenza di memoria virtuale, ogni processo vede uno spazio
-    di indirizzamento di dimensioni indipendenti dallo spazio fisico effettivamente a dispozione.
-    Anche questa virtualizzaione è realizzata dal kernel.
-    \item \textbf{Astrazione:} un oggetto astratto (risorsa virtuale) è la rappresentazione semplificata di un 
-    oggetto (risortsa fisica), quindi esibendo le proprietà significative per l'utilizzatore e nascondendo i dettagli realizzativi non importanti
-\end{lstlisting}
+Esmpi di virtualizzazione:
+\begin{itemize}
+    \item \textbf{Virtualizzazione a livello di processo:} i sistemi multitasking permettono l'esecuzione contemporanea di più processi, ognuno dei quale dispone 
+    di una macchina virtuale dedicata. Questo tipo di virtualizzazione viene realizzata dal kernel del sistema operativo.
+    \item \textbf{Virtualizzazione della memoria:} in presenza di memoria virtuale, ogni processo vede uno spazio di indirizzamento di dimensioni indipendenti dallo spazio fisico effettivamente a dispozione. Anche questa virtualizzaione è realizzata dal kernel.
+    \item \textbf{Astrazione:} un oggetto astratto (risorsa virtuale) è la rappresentazione semplificata di un oggetto (risortsa fisica), quindi esibendo le 
+    proprietà significative per l'utilizzatore e nascondendo i dettagli realizzativi non importanti
+\end{itemize}
 
-**Virtualizzazione della memoria**: 
+\subsection{Virtualizzazione di un Sistema di Elaborazione}
+Tramite la virtualizzazione una singola piattaforma hardware viene condivisa da più elaboratori virtuali, ognuno gestito da un proprio sistema operativo.
+Il disaccoppiamento viene realizzato dal \textbf{Virtual Machine Monitor (VMM)}, il cui compito è quello di consentire la condivisione da parte di più macchine 
+virtuali di una singola piattaforma hardware.
 
-**Astrazione**: 
+Quindi il \textbf{VMM} è il \textbf{mediatore unico} nelle interazioni tra le macchine virtuali e
+l'hardware, il quale garantisce: \textbf{isolamento tra le VM} e \textbf{stabilità del sistema}.
 
-#### Virtualizzazione di un Sistema di Elaborazione
-Tramite la virtualizzazione una singola piattaforma hardware viene condivisa da più elaboratori 
-virtuali, ognuno gestito da un proprio sistema operativo.
-
-Il disaccoppiamento viene realizzato dal **Virtual Machine Monitor (VMM)**, il cui compito
-è quello di consentire la condivisione da parte di più macchine virtuali di una singola
-piattaforma hardware.
-
-Quindi il **VMM** è il **mediatore unico** nelle interazioni tra le macchine virtuali e
-l'hardware, il quale garantisce: **isolamento tra le VM** e **stabilità del sistema**.
-
-
-### Tecniche del VMM:
-#### Emulazione
-L'emulazione è l'insieme di tutti quei meccanismi che permettono l'esecuzione di un programma
-compilato su un determiato sistema di girare su un qualsiasi altro sistema differente da quello
-nel quale è stato compilato.
+\subsection{Tecniche del VMM}
+\subsubsection{Emulazione}
+L'emulazione è l'insieme di tutti quei meccanismi che permettono l'esecuzione di un programma compilato su un determiato sistema di girare su un qualsiasi altro sistema differente da quello nel quale è stato compilato.
 Quindi vengono emulate interamente le singole istruzioni dell'architettura ospitata.
 
-I vantaggi dell'emulazione sono l'interoperabilità tra ambienti eterogenei, mentre gli svantaggi sono
-le ripercussioni sulle performances.
+I vantaggi dell'emulazione sono l'interoperabilità tra ambienti eterogenei, mentre gli svantaggi sono le ripercussioni sulle performances.
 
-Esistono principalmente due tecniche di emulazione: **interpretazione** e **ricompilazione dimanica**.
+\vspace{5mm}
+Esistono principalmente due tecniche di emulazione: \textbf{interpretazione} e \textbf{ricompilazione dimanica}.
 
-###### Interpretazione:
-L'interpretazione si basa sulla lettura di ogni singola istruzione del codice macchina che deve
-essere eseguito e sulla esecuzione di più istruzioni sull'host virtualizzante.
+\vspace{5mm}
+\textbf{Interpretazione}:
 
-Produce un sovraccarico elevento in quanto potrebbero essere necessarie molte istruzioni dell'host
-per interpretare una singola istruzione sorgente.
+L'interpretazione si basa sulla lettura di ogni singola istruzione del codice macchina che deve essere eseguito e sulla esecuzione di più istruzioni sull'host virtualizzante.
+Produce un sovraccarico elevento in quanto potrebbero essere necessarie molte istruzioni dell'host per interpretare una singola istruzione sorgente.
 
-##### Compilazione dinamica
-Invece di leggere una singola istruzione del sistema ospitato, legge interi blocchi di codice,
-vengono analizzati, tradotti per la nuova architettura, ottimizzati e messi in esecuzione.
+\vspace{5mm}
+\textbf{Compilazione dinamica}:
 
+Invece di leggere una singola istruzione del sistema ospitato, legge interi blocchi di codice, vengono analizzati, tradotti per la nuova architettura, ottimizzati e messi in esecuzione.
 Il vantaggio in termini prestazionali rispetto all'interpretazione è notevolmente maggiore.
-Ad esempio parti di codice utilizzati frequentemente vengono bufferizzati nella cache per evitare
-di doverli ricompilare in seguito.
+
+Ad esempio parti di codice utilizzati frequentemente vengono bufferizzati nella cache per evitare di doverli ricompilare in seguito.
 
 
 ..
 ..
 ..
 
-### Realizzaione dell VMM
-**Requisiti di Popek e Goldberg del 1974**
+\subsubsection{Realizzaione del VMM}
+\textbf{Requisiti di Popek e Goldberg del 1974}:
 
-1. **Ambiente di esecuzione per i programmi sostanzialmente identico a quello della macchina reale**:
-    Gli stessi programmi che eseguono nel sistema non virtualizzato possono essere eseguiti nelle VM
+\begin{itemize}
+    \item \textbf{Ambiente di esecuzione per i programmi sostanzialmente identico a quello della macchina reale}: Gli stessi programmi che eseguono nel sistema non virtualizzato possono essere eseguiti nelle VM
     senza modifiche e problemi.
-2. **Garantire un'elevata efficienza nell'esecuzione dei programmi**:
-    Il VMM deve permettere l'esecuzione diretta delle istruzioni impartite dalle macchine virtuali, quindi
-    le istruzioni non privilegiate vengono eseguite direttamente in hardware senza coinvolgere il VMM
-3. **Garantire la stabilità e la sicurezza dell'intero sistema**:
-    Il VMM deve sempre rimanere sempre nel pieno controllo delle risorse hardware, e i programmi in 
-    esecuzione nelle macchine virtuali non possono accedere all'hardware in modo privilegiato
+    \item \textbf{Garantire un'elevata efficienza nell'esecuzione dei programmi}: Il VMM deve permettere l'esecuzione diretta delle istruzioni impartite dalle macchine virtuali, quindi le istruzioni non 
+    privilegiate vengono eseguite direttamente in hardware senza coinvolgere il VMM
+    \item \textbf{Garantire la stabilità e la sicurezza dell'intero sistema}: Il VMM deve sempre rimanere sempre nel pieno controllo delle risorse hardware, e i programmi in  esecuzione nelle macchine virtuali non possono 
+    accedere all'hardware in modo privilegiato
+\end{itemize}
 
 #### Parametri e classificazione
 - **Livello** dove è collocato il VMM:
@@ -115,6 +85,8 @@ di doverli ricompilare in seguito.
     - **Virtualizzazione pura** (vmware): le macchine virtuali usano la stessa interfaccia 
     dell'architettura fisica
     - **Paravirtualizzazione** (xen): il VMM presenta un'interfacca diversa da quella dell'architettura HW
+
+
 
 
 \end{document}

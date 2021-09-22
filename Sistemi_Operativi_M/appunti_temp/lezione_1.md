@@ -120,4 +120,60 @@ Sorgono però due problemi:
 - **Ring compression**: se i ring utilizzati sono solo 2, applicazioni e s.o. della macchina virtuale
 eseguono allo stesso livello: scarsa protezione tra spazio del s.o. e delle applicazioni.
 
+# 22/09/2021
 ##### Ring Deprivileging
+Con Ring Deprivilenging si indica una situazione nel quale l'esecuzione di istruzioni privilegiate richieste dal sistema operativo nell'ambiente guest non
+possono essere eseguite in quanto richiederebbero un ring 0, ma il kernel della macchina virtuale esegue in un ring di livello superiore (foto telefono 1)
+
+Una possibile prima soluzione è il **Trap & Emulate**: nel quale se il guest tenta di eseguire un'istruzione privilegiata
+- la CPU notifica un'eccezione al VMM (**trap**) e gli trasferisce il controllo
+- il VMM controlla la correttezza dell'operazione richiesta e ne emula il comportamento (**emulate**)
+
+Quindi in poche parole la CPU notifica e delega al VMM il controllo e l'esecuzione dell'istruzione privilegiata.
+
+Esempio:
+Il guest tenta di disabilitare le interruzioni (popf), se la richiesta della macchina virtuale fosse eseguita direttamente sulla CPU sarebbero disabilitati
+tutti gli interrupt di sistema e quindi il VMM non potrebbe riottenere il controllo. Invece, con Trap&Emulate riceve la notifica di tale richiesta e ne emula
+il comportamento sospendendo gli interrupt solamente per la macchina virtuale richiedente.
+
+#### Supporto HW alla virtualizzazione
+L'archietettura della CPU si dice **naturalmente virtualizzabile** se e solo se prevede l'invio di trap al VMM per ogni istruzione privilegiata invocata da un
+livello di protezione differente dal quello del VMM.
+
+Se la CPU è naturalmente virtualizzabile viene implementato il trap&emulate, altrimenti, se non è virtualizzabile vi sono 2 possibilità: **Fast Binary Translation** e 
+**Paravirtualizzazione**.
+
+##### Fast Binary Translation
+Il VMM scansiona dinamicamente il codice dei sistemi operativi guest prima dell'esecuzione per sostituire a run time i blocchi contenenti istuzioni privilegiate
+in blocchi equivalenti dal punto di vista funzionale e contenenti chiamate al VMM. Inoltre i blocchi tradotti sono eseguiti e conservati in cache per eventuali
+riusi futuri. (SISTEMARE)
+
+(immagine slide 33)
+
+Il principale limite della Fast Binary Translation è che la traduzione dinamica è molto costosa. Però, con questa tecnica, ogni macchina virtuale è una esatta
+copia della macchina fisica, con la possiblità di installare gli stessi s.o. di architetture non virtualizzate.
+
+##### Paravirtualizzazione
+Il VMM (hypervison) offre al sistema operatico gurst un'interfaccia virtuale (ovviamente differente da quello hardware del processore) chiamata **hypercall API**
+alla quale i s.o. guest devono rifersi per avere accesso alle risorse (system call).
+Queste Hypercall API permettono di:
+- richiedere l'esecuzione di istruzioni privilegiate, senza generare un interrupt al VMM
+- i kernel dei s.o. guest devono quindi essere modificati per avere accesso all'interfaccia del particolare VMM
+- l astruttura del VMM è semplificata perchè non deve più preoccuparsi di tradurre dinamicamente i tentativi di operazioni privilegiate dei s.o. guest
+
+Le prestazioni rispetto alla Fast Binary Translation sono notevolmente superiori, però ovviamente c'è una necessità di porting dei dei s.o. guest (non sempre facile).
+
+(aggiungere protezione processore)
+
+#### Gestione di Macchine Virtuali
+Il compito principale del VMM è la gestione delle macchine virtuali, e quindi **creazione**, **spegnimento/accensione**, **eliminazione**, e **migrazione live**.
+
+Una Macchina Virtuale può trovarsi in differenti stati:
+- **Running** (o attiva): la macchina è accesa e occupa memoria nella ram del server sul quale è allocata
+- **Inactiva** (powered off): la macchina virtuale è spenta ed è rappresentata da un file immagine nel filesystem del server
+- **Paused**: la macchina virtuale è in attesa di un evento
+- **Suspended**: la macchina virtuale è stata sospesa dal VMM, il suo stato e le risorse utilizzate sono all'interno di un file immagine nel filesystem del server.
+    L'uscita dallo stato suspended avviene tramite l'operazione di **resume** da parte del VMM.
+
+(immagine stati slide 40)
+
