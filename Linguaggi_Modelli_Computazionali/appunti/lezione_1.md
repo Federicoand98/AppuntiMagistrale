@@ -83,3 +83,68 @@ la macchina si ferma.
 
 Per definizione della Macchina di Turing, quando alla fine la macchina si ferma, sul nastro c'è la soluzione del problema, altrimenti c'è stato un errore di 
 programmazione. (Comunque non è detto che SEMPRE arrivi ad HALT, attraverso le tre funzioni è possibile costruire un ciclo infinito).
+
+# 23/09/21
+
+Domande fondamentali:
+- Esiste sempre una opportuna Macchina di Turing capace di risolvere qualunque problema?
+- Esistono macchine più potetnti della Macchina di Turing?
+
+**Tesi di Church-Turing**
+Non esiste alcun formalismo capace di risolvere una classe di problemi più ampia di quella risolta dalla macchina di Turing.
+
+###### Macchine Specifiche vs Macchine Universali
+Una volta definita la parte di controllo, la MdT è in grado do risolvere un unico problema, quindi è **specifica** per quel tipo di problema.
+Le macchine specifiche quindi sono convenienti ovviamente per usi specifici e per mercati di massa. Sono invece sconvenienti se si vuole una macchina di uso generale
+con cui risolvere ogni problema. (Macchina Universale)
+
+Fino ad ora l'algoritmo realizzato da una data MdT era cablato nella macchina. Se invece l'algoritmo viene scritto sul nastro, e la macchina lo legge si ottiene
+una **Macchina di Turing Universale (UTM)**. In questo modo si ottiene una macchina il cui programma non cambia quando cambia il problema da risolvere. Quindi c'è
+la necessità di un **LOADER**, un algoritmo cablato che legge dal nastro la descrizione dell'algoritmo.
+
+Quindi richiede saper descrivere l'algoritmo richiesto, e per descrivere l'algoritmo serve un linguaggio e una macchina che lo interpreti. In questo modo possiamo
+considerare la **UTM** come l'interprete di un linguaggio. E quindi modella il concetto di elaboratore di uso generale (fetch, decode, execute)
+
+-- confronto mdt e von neumann --
+
+##### Computazione e Interazione
+Computazione e Interazione sono dimensioni ortogonali, espresse da due linguaggi distinti:
+- **linguaggio di computazione**: definisce le primitive per esprimere l'elaborazione delle informazioni
+- **linguaggio di coordinazione**: definisce le primitive per esprimere input/output di informazioni dal/verso il mondo esterno
+- linguaggio di comunicazione: definisce quali informazioni saranno trasmesse mediante le primitive del linguaggio di coordinazione, nonchè il formato di tali informazioni
+
+#### Introduzione alla Teoria della Computabilità
+Secondo la tesi di Church-Turing non esiste un formalismo capace di risolvere una classe più ampia di problemi della MdT. Quindi se nemmeno la macchina di Turing
+riesce a risolvere un determinato problema, **quel problema è irrisolubile**.
+
+Definiamo quindi **PROBLEMA RISOLUBILE**: ovvero un problema la cui soluzione può essere espressa da una MdT (o formalismo equivalente).
+Però la MdT cumputa **funzioni**, non problemi, perchè tutto torni bisogna associare a un problema una funzione.
+
+Quindi, per instaurare questo legame definiamo la **funzione caratteristica di un problema**.
+
+Dato un **problema P** e detti:
+- **l'insieme X dei suoi dati di ingresso**
+- **l'insieme Y delle risposte corrette**
+si dice **funzione caratteristica del problema P** $$f_p:X -> Y$$
+
+Bisogna quindi formalizzare quando una funzione caratteristica sia **computabile**
+
+**FUNZIONE COMPUTABILE**
+**Una funzione f:A->B è computabile se esiste una MdT che**:
+    - data sul nastro una rappresentazione x \in A
+**dopo un numero finito di passi**
+    - produce sul nastro una rappresentazione di f(x) \in B
+
+##### Funzioni Definibili vs Funzioni Computabili
+Tutte le funzioni sono computabili? Oppure essistono invece funzioni definibili ma non computabili?
+Occorre quindi confrontare le funzioni che possiamo **definire** con le funzioni che possiamo **computare** con la MdT.
+
+D'ora in poi consideriamo solo le funzioni computabili su N, ovvero terminabili in un numero naturale finito di passi (può essere applicato anche il procedimento di Godel)
+
+..
+..
+..
+..
+..
+..
+finite slide
