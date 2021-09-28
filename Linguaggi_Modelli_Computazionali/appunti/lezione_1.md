@@ -1,5 +1,5 @@
 # Capitolo 1
-### Linguaggi, Macchine Astratte, Teoria della Computabilità
+## Linguaggi, Macchine Astratte, Teoria della Computabilità
 
 - **Algoritmo**: sequenza finita di mosse che risolve in un tempo finito una classe di problemi
 - **Codifica**: descrizione dell'algoritmo tramite un insieme ordinato di frasi (istruzioni) di un linguaggio di programmazione, che specificano le azioni da svolgere
@@ -148,3 +148,81 @@ D'ora in poi consideriamo solo le funzioni computabili su N, ovvero terminabili 
 ..
 ..
 finite slide
+
+# Capitolo 2
+## Linguaggi e Grammatiche
+
+Secondo il dizionario un linguaggio è: un insieme di parole e di metodi di combinazione delle parole usate e comprese da una comunità di persone.
+Questa definizione è poco precisa in quanto non evita le ambiguità dei linguaggi naturali, non si presta a descrivere processi computazionali meccanizzabili e non aiuta a stabilire
+proprietà.
+
+Quindi c'è la necessita di una nozione di linguaggio più precisa. Un linguaggio come sistema formale, che permetta di definire:
+- le frasi lecite
+- se una frase appartiene ad un linguaggio o no
+- come stabilire il significato di una frase
+- quali elementi linguistici primitivi
+
+**Sintassi**: l'insieme delle regole formali per la scrittura di programmi in un linguaggio, che dettano le modalità per costruire frasi corrette nel linguaggio stesso. la sintassi è
+generalmente espressa tramite notazioni formali come BNF, EBNF, diagrammi sintattici
+
+**Semantica**: l'insieme dei significati da attribuire alle frasi (sintatticamente corrette) costruite nel linguaggio. La semantica è esprimibile:
+- a parole (poco precisa ed ambigua)
+- mendiante azioni -> **semantica operazionale**
+- mediante funzioni matematiche -> **semantica denotazionale**
+- mediante formule logiche -> **semantica assiomatica**
+
+Quindi possiamo definire la differenza tra interpretazione e compilazione:
+
+Un **interprete** per un linguaggio L:
+- accetta in ingresso le singole frasi di L
+- le esegue volta per volta
+Il risultato è la valutazione della frase
+
+Un **compilatore** per un linguaggio L, invece:
+- accetta in ingresso un intero programma scritto in L
+- lo riscrive in un altro linguaggio più semplice
+Il risultato è quindi una riscrittua della "macro-frase"
+
+L'**analisi lessicale** consiste nella individuazione delle singole parole (token) di una frase. L'analizzatore lessicale detto scanner o lexer legge una sequenza di caratteri, li aggrega in 
+token di opportune categorie (nomi, parole chiave, simboli, ecc).
+L'**analisi sintattica** consiste nella verifica che la frase, intesa come sequenza di token, rispetti le regole grammaticali del linguaggio. L'analizzatore sintattico, detto parser, data
+la sequena di token prodotta dallo scanner, genera una rappresentazione interna della frase, generalmente sotto forma di albero.
+L'**analisi semantica** consiste nel determinare il significato di una frase. L'analizzatore semantica, data la rappresentazione prodotta dal parser, controlla la coerenza logica della frase.
+
+##### Significato di una frase
+Chiedersi quale sia il significato di una frase significa associare a quella frase un concetto nella nostra mente. Per fare ciò nella nostra mente deve esserci una funzione che associa
+a ogni frase un concetto.
+Quindi tale funzione deve dare significato:
+- prima a ogni simbolo (carattere dell'alfabeto)
+- poi a ogni parola (sequenza lecita di caratteri)
+- infine a ogni frase (sequenza lecita di parole)
+
+##### Definizioni
+**Alfabeto**: un insieme finito e non vuoto di simboli atomici. es A = {a, b}
+
+**Stringa**: una sequenza di simboli, ossia un elemento del prodotto cartesiano A^n. Di conseguenza si definisce:
+    - Lunghezza di una stringa: il numero di simboli che la compongono
+    - Stringa vuota: stringa di lunghezza zero.
+
+**Linguaggio L su un alfabeto A**: un insieme di stringhe su A
+    - Frase (sentence) di un linguaggio: una stringa appartenente a quel linguaggio
+    - Cardinalità di un linguaggio: il numero delle frasi del linguaggio
+        - linguaggio finito: ha cardinalità finita
+        - linguaggio infinito: ha cardinalità infinita
+
+**Chiusura A\* di un alfabeto A** (o linguaggio universale su A):
+È l'insieme infinito di tutte le stringhe composte con sinboli di A: fomrula
+
+**Chiusura positiva di A+ di un alfabeto A**:
+È l'insieme infinito di tutte le stringhe non nulle composte con simboli di A: formula
+
+#### Grammatica Formale
+Una **grammatica** è una notazione formale con cui esprimere in modo rigoroso la **sintassi** di un linguaggio.
+La grammatica è un quadrupla <VT, VN, P, S> dove:
+- **VT**: è l'insieme finito di simboli terminali
+- **VN**: è un insieme finito di simboli non terminali
+- **P**: è un insieme finito di produzioni, ossia di regole di riscrittura **a -> b** dove **a** e **b** sono stringhe
+- **S**: è un particolare simbolo non-terminale detto **simbolo iniziale** o **scopo** della grmmatica.
+
+convenzioni
+
