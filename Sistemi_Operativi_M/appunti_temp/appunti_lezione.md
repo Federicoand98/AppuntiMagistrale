@@ -245,3 +245,97 @@ In quanto la paginazione è a carico dei guest, occorre un meccanismo efficiente
 memoria meno utilizzare.
 Una soluzione può essere che su ogni VM è in esecuzione un processo (**baloon process**) che comunica direttamente con il VMM, e che viene interpellato
 ogni volta che il VMM ha bisogno di ottenere nuove pagine ad esempio l'archiviazione di una VM.
+
+**Virtualizzazione della CPU**
+Il VMM definisce un'arcihtettura virtuale simile a quella del processore, nella quale però le istruzioni privilegiate vengono sostituite dalle
+hypercall. Nel quale l'invocazione di una hypercall determina il passaggio da guest a xen (ring 1 -> ring 0).
+Il VMM si occupa dello scheduling delle macchine virtuali: **Borrowed Virtual Time scheduling algorithm**, algoritmo genral purpose che consente di 
+scedulazioni efficienti.
+
+**Virtualizzazione dell'I/O**
+immagine
+
+- **back-end driver**: per ogni dispositivo, il suo driver è isolato all'interno di un ap articolare macchina virtuale, tipicamente Dom0. E ha accesso
+    diretto all'HW.
+- **front-end driver**: ogni guest rpevede un driver virtuale semplificato che consente l'accesso al devie tramite il back-end.
+
+I punti a favore di questa soluzione sono la portabilità, isolamente e semplificazione del VMM. Mentre i punti a sfavore sono: necessità di comunicazione
+con il back-end (asynchronous I/O rings).
+
+**Gestione di interruzioni ed eccezioni**
+La gestione delle interruzioni viene viertualizzata in questo modo: il vettore delle interruzioni punta direttamente alle routine del kernel guest: ogni
+interruzione viene gestita direttamente dal guest.
+Un caso particolare riguarda il page-fault:
+- la gestione non può essere delegata completamente al guest, perchè richiede l'accesso al registro **CR2**, contenete l'indirizzo che ha provocato
+    il page fault
+- aaaaaa
+
+Quidni per gestire il page-fault, 'handler punta a codice xen (execuzione nel ring 0). La routine di gestione eseguita da xen legge in contenuto di CR2
+e lo copia aaaaaa..... slide
+
+**Live migration in Xen**
+La migrazione in xen è una migrazione **guest-based**, nel quale il comando di migrazione viene eseguito da un demone di migrazione nel domain0 del
+server di origine della macchina da migrare. La realizzazione è basata su pre-copy, inoltre le pagine da migrare vengono compresse per ridurre
+l'occupazione di banda.
+
+**fine capitolo virtualizzazione**
+
+# La Protezione nei Sistemi Operativi
+
+**Sicurezza**: riguarda l'insieme delle tecniche per regolamentare l'accesso degli utenti al sistema di elaborazione. La sicurezza impedisce accessi
+non autorizzati al sistema e i conseguenti tentativi dolosi di alterazione e distruzione di dati.
+
+**Protezione**: insieme di attività volte a garantire il controllo dell'accesso alle risorse logiche e fisiche da parte degli utenti autorizzati
+all'uso di un sistema di calcolo.
+
+La sicurezza mette a disposizione meccanismi di **identificazione, autenticazione, ...**
+
+Per rendere un sistema sicuro è necessario stabilire per ogni utente autorizzato:
+- quali siano le risore alle quali può accedere
+- con quali operazioni può accedervi
+Tutto ciò è stabilito dal sistema di protezione attraverso delle tecniche di controllo dell'accesso.
+
+In un sistema il controllo degli accessi si esprime tramite la definizione di tre livelli concettuali:
+- modelli
+- politiche
+- meccanismi
+
+#### Modelli
+Un modello di protezione definisce i soggetti, gli oggetti e i diritti d'accesso:
+- **oggetti**: costituiscono la parte passiva, cioè le risorse fisiche e logiche alle quali si può accedere e su cui si può operare.
+- **soggetti**: rappresentano la parte attiva di un sistema, cioè le eintità che possono richiedere l'accesso alle risorse (utenti e processi)
+- **diritti d'accesso**: sono le operazioni con le quali è possibile operare sugli oggetti
+
+(Un soggetto può avere diritti d'accesso sia per gli oggetti che per gli altri soggetti)
+
+Ad ogni soggetto è associato un **dominio di protezione**, che rappresenta l'ambiente di protezione nel quale il soggetto esegue. Quindi il dominio
+indica i diritti d'accesso posseduti dal sogetto nei confronti di ogni risorsa.
+Un dominio di protezioen è unico per ogni soggetto, mentre un processo può eventualmente cambiare dominio durante la sua esecuzione.
+
+#### Politiche
+Le **politiche di protezione** definiscono le regole con le quali i soggetti possono accedere agli oggetti
+Classificazione delle politiche:
+- **discretional access control (DAC)**: il creatore di un oggetto controlla i diritti di accesso per quell'oggetto (unix). La definizione delle politiche è
+    decentralizzata.
+- **mandatory access control (MAC)**: i diritti di accesso vengono definiti in modo centralizzato. Ad esempio in installazioni di alta sicurezza
+- **role based access control (RBAC)**: ad un ruolo sono assegnati specifici diritti di accesso sulle risorse. Sli utenti possono appartenere a diversi
+    ruoli. I diritti attribuiti ad ogni ruolo vengono assegnati in modo centralizzato
+
+**Principio del privilegio minimo**: ad ogni soggetto sono garantiti i diritti d'accesso solo agli oggetti strettamente necessari per la sua esecuzione
+(POLA: principle of least authority). il POLA è una caratteristicha desiderabile in ogni sistema di controllo.
+
+#### Meccanismi
+I **meccanismi di protezione** sono gli strumenti necessari a mettere in atto una determinata politica.
+Principi di realizzazione:
+- **Flessibilità del sistema di protezione**: i meccanismi devono essere sufficientemente generali per consentire l'applicazione di diverse politiche 
+    di protezione
+- **Separazione tra meccanismi e politiche**: la politicha definische "cosa va fatto" ed il meccanismo "come va fatto". Ovviamente è desiderata la
+    massima indipendenza tra le due componenti.
+
+#### Dominio di protezione
+Un dominio definisce un insiem edi coppie, ognuna contenente l'identificatore di un oggetto e l'insieme delle operazioni che il soggetto associato al
+dominio può eseguire su ciascun oggetto
+
+$$ D(S) = {<o, diritti> | o è un oggetto, diritti è un insieme di operazioni} $$
+
+
