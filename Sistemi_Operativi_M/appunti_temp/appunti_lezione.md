@@ -177,3 +177,71 @@ Una Macchina Virtuale può trovarsi in differenti stati:
 
 (immagine stati slide 40)
 
+
+# 28/09/21
+
+migrazione live
+
+#### Suspend/Resume
+Il VMM può mettere in **suspend** una VM salvandone lo stato in memoria secondaria. Invece con l'operazione di **resume** la VM esce dallo stato di 
+suspend e il VMM recupera lo stato dalla memoria secondaria. Resume e Suspen permettono e facilitano la **Migrazione**, ovvero il trasferimento
+della macchina da un nodo ad un'altro.
+
+#### Precopy
+La migrazione viene effettuatat in 6 fasi:
+- **pre-migrazione**: individuazione della VM da migrare e dell'host (B) di destinazione
+- **reservation**: viene inizializzata una VM (container) sul server di destinazione
+- **pre-copia iterativa delle pagine**: viene eseguita una copia nell'host B di tutte le pagine allocate in memoria sull'host A per la VM da migrare, 
+    successivamente vengono iterativamente copiate da A a B tutte le pagine modificate (dirty pages) fino a quando il numero di dirty pages diventa
+    inferiore ad un soglia prestabilita
+- **sospensione della VM e copia dello stato + dirty pages** da A a B
+- **commit**: la VM viene eliminata dal server A
+- **resume**: la VM viene attivata nel server B
+
+In alternativa alla pre-copy una soluzioen può essere la **post-copy**, nel quale la VM viene sospesa, copiata interamente non iterativamente e poi 
+eliminata. La principale differenza tra pre-copy e post-copy è che con il meccanismo della pre-copy viene ridotto al minimo il **downtime** della VM.
+
+##### Piccolo approfondimento su XEN
+Xen è un VMM open source che sfrutta i principi di paravirtualizzazione. È nato come progetto accademico nell'Università di Cambridge, successivamente
+viene effettuato un porting di Linux su Xen. È stato modificato il kernel linux per poter interagire con le API di Xen.
+
+L'architettura di Xen si basa sulla virtualizzaizione di sistema, nel quale è presente un hypervisor posizionato direttamente al di sopra dell'HW.
+Le VM di xen vengono chiamate **domain**, è sempre presente un **domain 0**, ovvero quella VM utilizzata per lo operazioni privilegiate, quindi
+quella macchina speciale che permette di controllare e operare sull'intero sistema.
+
+Il VMM o hypervisor quindi si occupa di virtualizzare la CPU, memoria e dispositivi di I/O. Xen mette a disposizione un'interfaccia per poter usufruire
+del VMM.
+
+- Paravirtualizzazioen di Xen:
+    - le VM eseguono direttakmente le istruzioni non privilegiate
+    - l'esecuzione di istruzioni privilegiate viene delegata al VMM tramite chiamate al VMM
+- protezione (x86):
+    - i s.o guest sono collocati nel ring 1
+    - VMM collocata nel ring 0
+
+**Xen: Gestione della memoria e paginazine**
+- gestione della memoria:
+    - i s.o. gestiscono la memoria virtuale mediante i tradizionali meccanismi di paginazione
+    - x86: page faults gestiti direttamente a livello HW (TLB)
+- soluzione adottata: tabelle delle pagine delle VM:
+    - vengono mappate nella memoria fisica dal VMM (shadow page tables)
+    - non possono essere accedute in scrittura dai kernel guest, ma solo dal VMM
+    - sono accessibili in modalità read-only anche dai guest
+    In caso di necessità di update interviene direttamente il VMM che valida re richieste di update dei guest e le esegue
+- memory split:
+    - Xen risiede nei primi 64 MD del virtual address space
+    - in questo modo non è necessario eseguire un TLB flush per ogni hypercall
+
+I guest OS si occupano della paginazione, delegano al VMM la scrittura delle page table entries, inoltre le tabelle vengono create e verificate dal
+VMM su richiesta dei guests, una volta create quindi queste tabelle rimangono read-only.
+
+**Creazione di un processo** (fork)
+Il s.o. guest richiede ina nuova tabella delle pagine al VMM:
+    - alla tabella vengono aggiunte le pagine appartenenti al segmento di xen
+    - xen registra la tabella delle pagine e acquisisce il diritto di scrittura esclusiva
+    - ogni successiva update dal parte del guest provocherà un **protection-fault**, la cui gestion comporterà la verifica e l'aggiornamento della table.
+
+In quanto la paginazione è a carico dei guest, occorre un meccanismo efficiente che consenta al VMM di reclamare ed ottenere dalle altre VM pagine di
+memoria meno utilizzare.
+Una soluzione può essere che su ogni VM è in esecuzione un processo (**baloon process**) che comunica direttamente con il VMM, e che viene interpellato
+ogni volta che il VMM ha bisogno di ottenere nuove pagine ad esempio l'archiviazione di una VM.
