@@ -339,3 +339,81 @@ dominio può eseguire su ciascun oggetto
 $$ D(S) = {<o, diritti> | o è un oggetto, diritti è un insieme di operazioni} $$
 
 
+#### Modello di Grahmm-Denning
+Questo modello forsnisce una serie di comandi che garantiscono la modifica controllata dello stato di protezione:
+- create object
+- delete object
+- create subject
+- delete subject
+- read access right
+- grant access right
+- delete access right
+- tranfer access right
+
+##### Diritti
+**Diritto Owner**:
+Il diritto owner permette l'assegnazioen di qualunque diritto di accesso su un oggetto X ad un qualunque soggetto Sj da parte di un soggetto Si. L'operazione è consentita solo
+se il diritto owner appartiene a A[Si, X]
+
+**Diritto Control**:
+Eliminazione di un diritto di accesso per un oggetto X nel dominio di Sj da parte di Si. L'operazione è consentita solo se il diritto control appartiene a A[Si, Sj], oppure owner
+appartiene a A[Si, X].
+
+**Cambio di dominio: switch**
+Il cambio di dominio permette che un processo che esegue nel dominio del soggetto si può commutare al dominio di un altro soggetto Sj.
+L'operazione è consentita solo se il diritto switch appartiene a A[Si, Sj].
+
+#### Realizzazione della matrice delgi accessi
+La matrice degli accessi è una notazione astratta che rappresenta lo stato di protezione. Nella rappresentazione concreta è necessario considerare: la dimensione della matrice e matrice 
+sparsa.
+
+La rappresentazione concreta della matrice degli accessi deve essere ottimizzata sia riguardo all'occupazione di memoria sia rispetto all'efficienza nell'accesso e nella gestione della
+informazioni di protezione.
+Ci sono principalmente di approcci:
+- **Access Control List (ACL)**: rappresentazione per colonne, per ogni oggetto è associata una lista che contiene tutti i soggetti che possono accedere all'oggetto, con i relativi diritti
+    d'accesso per l'oggetto
+- **Capability List**: rappresentazione per righe, ad ognin soggetto è associata una lista che contiene gli oggetti accessibili dal soggetto ed i relativi diritti d'accesso.
+
+##### Access Control List
+La lista degli accessi per ogni oggetto è rappresentata dall'insieme delle coppie: **<soggetto, insieme dei diritti>**
+limitatamente ai soggetti con un insieme non vuoto di diritti per l'oggetto.
+Quando deve essere eseguita un'operazione M su un oggetto Oj, da parte di Si, si cerca nella lista degli accessi **<Si, Rk>, con M appartenente a Rk**
+La ricerca può essere fatta preventivamente in una lista di default contenete i diritti di accesso applicabili a tutti gli oggetti. 
+Se in entrambi i casi la risposta è negativa, l'accesso è negato.
+
+**Utenti e Gruppi**
+Generalmente ogni soggetto rappresenta un singolo utente. Molti sistemi hanno il concetto di **gruppo di utenti**. I gruppi hanno un nome e possono essere inclusi nella ACL.
+In questo caso l'entry in ACL ha la forma:
+**UID_1, GID_1 : <insieme di diritti>**
+**UID_2, GID_2 : <insieme di diritti>**
+Dove UID è lo user identifier e GID è il group identifier.
+
+In certi casi il gruppo identifica un ruolo: uno stesso utente può appartenere a gruppi diversi e quindi  con diritti diversi. In questo caso, quando un utente accede, specifica il
+gruppo di appartenenza.
+
+##### Capability List
+La lista delle capability, per ogni soggetto, è la lista di elementi ognuno dei quali:
+- è associato a un oggetto a cui il soggetto può accedere
+- contiene i diritti di accessi consentiti su tale oggetto
+
+Ogni elemento della lista prende il nome di **capability**. Il quale di compone di un identificatore (o un indirizzo) che indica l'oggetto e la rappresentazione dei vari diritti d'accesso.
+Quando S intende eseguire un'operazione M su un oggetto Oj: il meccanismo di protezione controlla se nella lisra delle capability associata a S ne esiste una relativa ad Oj che abbia
+tra i suoi diritti M.
+
+Ovviamente le Capability List devono essere protette da manomissioni, ed è possibile in diversi modi:
+- la capability list viene gestita solamente da s.o.; l'utente fa riferimento ad un puntatore (capability) che identifica la sua posizione nella lista appartenete allo spazio del kerner
+- Architettura etichettata: a livello HW, ogni singola parola ha bit extra, che esprimono la protezione su quella cella di memoria. Ad esempio, se è una capability, deve essere
+protetta da scritture non autorizzate.
+I bit tag non sono utilizzari dall'aritmetica, dai confronti e da altre istruzioni normali e può essere modificato solo da programmi che agiscono in modo kernel.
+
+##### Revoca dei diritti di accesso
+In un sistema di protezione dinamica può essere necessario revocare i diritti d'accesso per un oggetto. La revoca può essere di tre tipi:
+- **generale o selettiva**: cioè valere per tutti gli utenti che hanno quel diritto di accesso o solo per un gruppo
+- **parziale o totale**: cipè riguardare un sottoinsieme di diritti per l'oggetto, o tutti
+- **temporanea o permanente**: cioè il diritto di accesso non sarà più disponibile, oppure potrà essere successivamente riottenuto
+
+**Revoca del diritto per un oggetto con ACL**:
+Si fa riferimento alla ACL associata all'oggetto e si cancellano i diritti di accesso che si vogliono revocare
+
+**Revoca del diritto per un oggetto con Capability List**:
+Più complicato rispetto ad ACL. È necessario verificare per ogni dominio se contiene la capability con riferimento all'oggetto considerato.
