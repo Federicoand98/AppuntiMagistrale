@@ -417,3 +417,47 @@ Si fa riferimento alla ACL associata all'oggetto e si cancellano i diritti di ac
 
 **Revoca del diritto per un oggetto con Capability List**:
 Più complicato rispetto ad ACL. È necessario verificare per ogni dominio se contiene la capability con riferimento all'oggetto considerato.
+
+
+..
+..
+..
+..
+
+# 5/10/2021
+
+## Programmazione Concorrente
+La programmazione concorrente è l'insieme delle tecniche, metodologie e strumenti per il supporto all'esecuzione di sistemi software composti da insiemei di attività svolte
+simultaneamente.
+
+hardware
+
+### Tipi di Applicazioni
+- **Multithreaded**: applicazioni strutturate come un insieme di processi con lo scopo di aumentare l'efficienza, ridurre la complessità e la programmazione. I processi posssono
+condividere variabili, generalmente esistono più processi che processori; e i processi vengono schedulati ed eseguiti indipendentemente.
+- **Sistemi multitasking/Sistemi Distribuiti**: le componenti dell'applicazione (task) vengono eseguite sui nodi, generalemente virtuali, collegati tramite opportuni mezzi
+di interconnessione. E i processi comunicano scambiandosi messaggi.
+- **Applicazioni Parallele**: applicazioni che sfruttano al massimo il parallelismo disponibile a livello HW. Infatti vengono eseguite su sistemi specificatamente paralleli
+come HPC o processori vettoriali, facendo largo uso di algoritmi paralleli. A seconda del modello architetturale, l'esecuzione è portata avanti da istruzioni/thread/processi paralleli
+che interagiscono utilizzando specifiche librerie.
+
+### Processi non sequenziali e tipi di interazione
+- **Algoritmo**: procedimento logiche che deve essere eseguito per risolvere in determinato problema
+- **Programma**: descrizione di un algoritmo mediante un opportuno formalismo (linguaggio di programmazione), che rende possibile l'esecuzione dell'algoritmo da parte di un
+particolare elaboratore
+- **Processo**: insieme **ordinato degli eventi** cui dà luogo un elaboratore quando opera sotto il controllo di un programma.
+- **elaboratore**: entità astratta realizzata in HW e parzialmente in SW in grado di eseguire programmi
+- **Evento**: esecuzione di un'operazione tra quelle apparteneti all'insieme che l'elaboratore sa riconoscere ed eseguire, ogni evento determina una **transizione di stato**
+dell' elaboratore.
+
+Quindi un programma non descrive un processo, ma un insieme di rpocessi, ognuno dei quali è relativo all'esecuzione del programma da parte dell'elaboratore per un determinato....
+
+**Processo Sequenziale**: sequenza di stati attraverso i quali passa l'elaboratore durante l'esecuzione di un programma.
+
+Un processo può essere rappresentato tramite un grafo orienteto detto **gtafo di precedenza del processo**, costituito da nodi ed archi orientati:
+- i nodi del grafo rappresentano i singoli eventi del processo
+- gli archi orientati identificano le precedenze temporali tra tali eventi
+Ogni nodo rappresenta quindi un evento corrispondente all'esecuzione di un'operazione tra quelle appartenti all'insieme che l'eleaboratore sa riconoscere ed eseguire
+
+**Processi non sequenziali**:
+L'insieme degli eventi che lo descrive è ordinato secondo una relazione d'ordine parziale.
