@@ -460,4 +460,95 @@ Un processo può essere rappresentato tramite un grafo orienteto detto **gtafo d
 Ogni nodo rappresenta quindi un evento corrispondente all'esecuzione di un'operazione tra quelle appartenti all'insieme che l'eleaboratore sa riconoscere ed eseguire
 
 **Processi non sequenziali**:
-L'insieme degli eventi che lo descrive è ordinato secondo una relazione d'ordine parziale.
+L'insieme degli eventi che lo descrive è ordinato secondo una relazione d'ordine parziale. Quindi per descrivere un processo non sequenziale utilizziamo
+un **grado di precedenza ad ordinamento parziale**.
+
+# 6/10/21
+Per poter eseguire un processo non sequenziale, ovviamente, richiede un elaboratore non sequenziale.
+
+**Processi Interagenti**: le interazioni tra processi di lettura, elaborazione e scruttira sono dettati da uno scambio di informazioni.
+
+**Tipi di Decomposizione**
+La decomposizione di uno sgrafo di precedenza ad ordinamento parziale può essere effettuato in modi differenti, orizzontalmente (quindi per archi), oppure
+verticalmente (per processi), generalmente si sceglie quello che permette di avere il minimo numero di interazioni possibili.
+
+#### Interazione tra processi
+Comprende tutte le interazoini prevedibili e desderate, insite quindi nella logica degli algoritmi. Generalmente
+prevede scambio di informazioni, o dati (quindi messaggi, e quindi comunicazione), oppure segnali temporali (senza trasfermento di dati).
+
+**Competizione**:
+La macchina concorrente su cui i processi sono eseguiti mette a disposizione un numero linitato di risorse condivise tra i processi.
+L'obiettivo della competizione è il coordinamente dei processi nell'accesso alle risorse condivise. Quindi, nel caso determinate risorse non
+possono essere accedibili a più processi contemporaneamente, è necessario quindi prevedere dei meccanismi che facciano rispettare le regole di accesso
+delle risorse e quindi regolino la competizione (in breve è una forma di sincronizzazione in più).
+
+Un esempio è la Mutua Esclusione, nel quale, ad esempio, due processi devono utilizzate in determinati istanti una risorsa condivisa, ma questa
+risorsa può essere acceduta solamente da un processo alla volta. Quindi gli accessi alla risorsa devono essere fatti in modo mutuamente esclusivo, ovvero
+un processo alla volta.
+
+**Sezione Critica**:
+Sequenza di istruzioni con le quali un processo accede a un oggetto condiviso con altri oggetti. Ad un oggetto può essere associata ad una sola
+sezione critica (usata da tutti i processi) o più sezioni critiche (classe di sezioni critiche). **Sezioni critiche appartenenti alla stessa classe**
+**devono escludersi mutuamente nel tempo**.
+
+L'interazione tra processi può essere di puù tipi:
+- Cooperazione: sincronizzazione diretta o esplicita
+- Competizione: sincronizzazione indiretta o implicita
+- Interferenza: interazione provocata da errori di programmazione (deadlock), interazione non prevista e non desiderata.
+
+### Architetture e Linguaggi per la programmazione concorrente
+
+Proprietà che un linguaggio per la programmazione concorrente deve avere:
+- contenere appositi costrutti con i quali è possibile dichiarare moduli di programma destinati ad essere eseguiti come processi sequenziali distinti
+- non tutti i processi vengono eseguiti contemporaneamente. Acluni processi vengono svolti solamente se si verificano determinate condizioni
+- cose
+
+Una macchina concorrente è costituita da HW e componenti SW che permettono la multiprogrammazione. Ovviamente, in una Macchina astratta M, oltre
+ai processi di multiprogrammazione e sincronizzazioen è presente anche il meccanismo di **protezione**, e quindi il meccaniscmo di controllo
+degli accessi alle risorse, in grado di:
+- rilevare eventuali interfrerenze tra i processi
+- pu essere realizzato in HW o in SW nel supporto a tempo di esecuzione
+- capabilities e liste di controllo degli accessi
+
+Il kernel offre supproto a tempo di esecuzione di un linguaggio concorrente.
+Nel kernel sono sempre presenti due funzionalità base:
+- meccanismo di multiptogrammazione
+- meccanismo di sincronizzazione e comunicazione
+
+**Architettura di M**:
+Due diverse organizzazioni logiche:
+- gli elaboratori di M sono collegati ad un'unica memoria principale (sistemi multiprocessore)
+- gli elaboratori di M sono collegati da una sottorete di comunicazione, senza memoria comune
+
+Queste due organizzazioni logiche di M definiscono due modelli di interazione tra i processi:
+- Modello a memoria comune, nel quale l'interazione tra i processi avviene tramite oggetti contenuti nella memoria comune (modello ad ambiente globale)
+- Modello a scambio di messaggi, nel quale la comunicazione e la sincronizzazione tra i processi si basa sullo scambio di messaggi sulla rete che collega
+i vari elaboratori.
+
+### Costrutti linguistici per la specifica della concorrenza
+
+#### Fork/Join
+L'esecuzione di una **fork** (non la system call unix) coincide con la creazioen e l'attivazione di un processo che inizia la propria esecuzioen in parallelo
+con quella del processo chiamante.
+La **join** è una primitiva di sincronizzazione che permette di determinare quando un processo, creato tramite la fork, ha terminato il suo compito,
+sincronizzandosi con tale evento.
+
+#### Cobegin-Coend
+Alternativa al modello fork/join, prende ispirazione al modello di programmazione strutturata.
+
+s_0;
+**cobegin**
+    s_1;
+    s_2;
+    s_2;
+**coend**
+s_4;
+
+Le istruzioni S1, S2,..Sn sono eseguite in parallelo. Ogni si può contenere altre istruzioni cobegin..coend al suo interno.
+
+### Proprietà dei programmi
+**Traccia dell'esecuzione**: sequenza degli stati attraversati dal sistema di elaborazione durante l'esecuzione del programma
+**Stato**: insieme dei valori delle variabili definite nel programma più variabili implicite (es valore del Program Counter).
+
+**Proprietà safety**: proprietà che garantisce cje durante l'esecuzioen di P non si entrerà mai in uno stato errato
+**Propietà liveness**: 
