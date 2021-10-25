@@ -77,14 +77,84 @@ Ad esempio parti di codice utilizzati frequentemente vengono bufferizzati nella 
     accedere all'hardware in modo privilegiato
 \end{itemize}
 
-#### Parametri e classificazione
-- **Livello** dove è collocato il VMM:
-    - **VMM di sistema**: eseguono direttamente sopra l'hardware dell'elaboratore (vmware esx, xen, kvm)
-    - **VMM ospitati**: eseguiti come applicazioni sopra un S.O. esistente (parallels, virtualbox)
-- **Modalità di dialogo**: per l'accesso alle risorse fisiche tra la macchina virtuale ed il VMM:
-    - **Virtualizzazione pura** (vmware): le macchine virtuali usano la stessa interfaccia 
-    dell'architettura fisica
-    - **Paravirtualizzazione** (xen): il VMM presenta un'interfacca diversa da quella dell'architettura HW
+\textbf{Parametri e classificazione}
+\begin{itemize}
+    \item \textbf{Livello} nel quale è collocato il VMM:
+    \begin{itemize}
+        \item \textbf{VMM di sistema}: eseguono direttamente sopra l'hardware del elaboratore (vmware, esx, xen, kvm)
+        \item \textbf{VMM ospitati}: eseguiti come applicazioni sopra un S.O. esistente (parallels, virtualbox)
+    \end{itemize}
+    \item \textbf{Modalità di dialogo}: per l'accesso alle risorse fisiche tra le macchine virtuali ed il VMM:
+    \begin{itemize}
+        \item \textbf{Virtualizzazione pura} (vmware): le macchine virtuali usano la stessa interfaccia dell'architettura fisica
+        \item \textbf{Paravirtualizzazione} (xen): il VMM presenta un'interfaccia diversa da quella dell'architettura HW
+    \end{itemize}
+\end{itemize}
+
+
+
+
+\section{La protezione nei Sistemi Operativi}
+
+
+
+\section{Programmazione Concorrente}
+
+
+\section{Modelli di Interazione tra i Processi}
+
+Esistono 2 principali modelli di interazione tra i processi:
+\begin{itemize}
+    \item Modello a \textbf{memoria comune} (ambiente globale, shared memory)
+    \item Modello a \textbf{scambio di messaggi} (ambiente locale, distributed memory)
+\end{itemize}
+
+\subsection{Modello a memoria comune}
+
+Il modello a memoria comune rappresenta la più semplice astrazione del funzionamento di un sistema in multiprogrammazione costituito da uno o più processi che hanno accesso
+ad una memoria comune.
+
+Ogni appliczione viene strutturata come un insieme di componenti, suddiviso in due sottoinsieme disgiunti:
+\begin{itemize}
+    \item \textbf{Processi} (componenti attivi)
+    \item \textbf{Risorse} (componenti passivi)
+\end{itemize}
+
+Le Risorse rappresentatno un qualunque oggettim fisico o logico, di cui un processo necessita per portare a termine il suo compito.
+Le risorse vengono raggruppate in classi, dove una classe rappresenta l'insieme di tutte e sole le operazioni che un processo può eseguire per operare su risorse di quella classe,
+
+Ovviamente ci deve essere la necessità di specificare quali processi ed in quali istanti possono accedere alla risorsa. Quindi il \textbf{meccanismo di controllo degli accessi}
+si occupa di controllare che gli accessi dei processi alle risorse avvengano correttamente.
+
+\vspace{5mm}
+\textbf{Gestore di una risorsa:}
+
+Per ogni risorsa \textbf{R}, il suo gestore definisce, in ogni istante t, \textbf{l'insieme SR(t) dei processi che, in tale istante, hanno il diritto di operare su R}.
+
+\vspace{5mm}
+
+Classificazione delle risorse:
+\begin{itemize}
+    \item Risorsa R \textbf{dedicata}: se SR(t) ha una caardianlità sempre <= 1
+    \item Risorsa R \textbf{condivisa}: in caso contrario
+    \item Risorsa R \textbf{allocata staticamente}: se SR(t) è una costante, quindi se SR(t) = SR(t0) per ogni t
+    \item Risorsa R \textbf{allocata dinamicamente}: se SR(t) è funzione del tempo
+\end{itemize}
+
+Per ogni risorsa \textbf{allocata staticamente}, l'insieme SR(t) è definito prima che il programma inizi la propria esecuzione; il gestore della risorsa è il programmatore che,
+in base alle regole del linguaggio, stabilisce quale processo può vedere e quindi operare su R.
+
+Per ogni risorsa \textbf{allocata dinamicamente}, il relativo gestore GR definisce l'insieme SR(t) in fase di esecuzione e quindi deve essere un componente della stessa applicazione,
+nel quale l'allocazione viene decisa a run-time in base a politiche date.
+
+\vspace{5mm}
+Quindi i principali compiti del Gestore delle risorse sono:
+\begin{itemize}
+    \item mantenere \textbf{aggiornato} l'insieme SR(t) e cioè lo stato di allocazione della risorsa
+    \item fornire i \textbf{meccanismi} che un processo può utilizzare per acquisire il diritto di operare sulla risorsa, entrando a far parte dell'insieme SR(t), e per rilasciare
+    tale diritto quando non è più necessario
+    \item implementare la \textbf{startegia} di allocazione della risorsa e cioè definire quando, a chi e per quanto tempo allocare la risorsa.
+\end{itemize}
 
 
 
