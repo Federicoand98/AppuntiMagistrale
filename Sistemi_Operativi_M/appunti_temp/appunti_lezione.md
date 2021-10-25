@@ -552,3 +552,37 @@ Le istruzioni S1, S2,..Sn sono eseguite in parallelo. Ogni si può contenere alt
 
 **Proprietà safety**: proprietà che garantisce cje durante l'esecuzioen di P non si entrerà mai in uno stato errato
 **Propietà liveness**: 
+
+# Modelli di interazione tra processi
+
+- Modello a **memoria comune** (ambiente globale, shared memory)
+- Modello a **scambio di messaggi** (ambiente locale, distributed memory)
+
+## Modello a memoria comune
+Il modello a memoria comune rappresenta la più semplice astrazione del funzionamento di un sistema in multiprogrammazione costituito da uno o più processi che hanno accesso
+ad una memoria comune.
+
+Ogni appliczione viene strutturata come un insieme di componenti, suddiviso in due sottoinsieme disgiunti:
+- **processi** (componenti attivi)
+- **risorse** (componenti passivi)
+
+Le Risorse rappresentatno un qualunque oggettim fisico o logico, di cui un processo necessita per portare a termine il suo compito.
+Le risorse vengono raggruppate in classi, dove una classe rappresenta l'insieme di tutte e sole le operazioni che un processo può eseguire per operare su risorse di quella classe,
+
+Ovviamente ci deve essere la necessità di specificare quali processi ed in quali istanti possono accedere alla risorsa. Quindi il **meccanismo di controllo degli accessi**
+si occupa di controllare che gli accessi dei processi alle risorse avvengano correttamente.
+
+#### Gestore di una risorsa
+Per ogni risorsa **R**, il suo gestore definisce, in ogni istante t, **l'insieme SR(t) dei processi che**, in tale istante, **hanno il diritto di operare su R**.
+
+Classificazione delle risorse:
+- Risorsa R **dedicata**: se SR(t) ha una caardianlità sempre <= 1
+- Risorsa R **condivisa**: in caso contrario
+- Risorsa R **allocata staticamente**: se SR(t) è una costante, quindi se SR(t) = SR(t0) per ogni t
+- Risorsa R **allocata dinamicamente**: se SR(t) è funzione del tempo
+
+Per ogni risorsa **allocata staticamente**, l'insieme SR(t) è definito prima che il programma inizi la propria esecuzione; il gestore della risorsa è il programmatore che,
+in base alle regole del linguaggio, stabilisce quale processo può vedere e quindi operare su R.
+
+Per ogni risorsa **allocata dinamicamente**, il relativo gestore G_R definisce l'insieme SR(t) in fase di esecuzione e quindi deve essere un componente della stessa applicazione,
+nel quale l'allocazione viene decisa a run-time in base a politiche date.
