@@ -1,5 +1,7 @@
 \documentclass{article}
 \usepackage[utf8]{inputenc}
+\usepackage{listings}
+\usepackage{graphicx}
 
 \title{Sistemi Operativi M}
 \author{Federico Andrucci}
@@ -65,7 +67,8 @@ Ad esempio parti di codice utilizzati frequentemente vengono bufferizzati nella 
 ..
 ..
 
-\subsubsection{Realizzaione del VMM}
+
+\subsection{Realizzaione del VMM}
 \textbf{Requisiti di Popek e Goldberg del 1974}:
 
 \begin{itemize}
@@ -91,7 +94,79 @@ Ad esempio parti di codice utilizzati frequentemente vengono bufferizzati nella 
     \end{itemize}
 \end{itemize}
 
+\subsubsection{Ring di protezione}
 
+La CPU prevede due livelli di protezione: \textbf{supervisore o kernel (0)} e \textbf{utente (>0)}.
+
+Ogni ring corrisponde a una diversa modalità di funzionamento del processore:
+\begin{itemize}
+    \item a livello 0 vengono eseguite le istruzioni privilegiate della CPU
+    \item nei ring di livello superiore a 0 le istruzioni privilegiate non vengono eseguite
+\end{itemize}
+
+Alcuni progrmmi sono progettati per eseguire nel ring 0, ad esempio il Kernel del S.O. infatti è l'unico componente che ha pieno controllo dell'hardware.
+
+{\large \textbf{VMM (vmm di sistema)}}
+In un sistema virtualizzato il VMM deve essere l'unica componente in grado di mantenere il controllo completo dell'hardware. Infatti solo il VMM opera nello stato supervisore, 
+mentre il S.O. e le applicazioni eseguono in un ring di livello superiore.
+
+Sorgono però due problemi:
+\begin{itemize}
+    \item \textbf{Ring deprivileging}: il s.o. della macchina virtuale esegue in un ring che non gli è proprio
+    \item \textbf{Ring compression}: se i ring utilizzati sono solo 2, applicazioni e s.o. della macchina virtuale eseguono allo stesso livello: 
+    scarsa protezione tra spazio del s.o. e delle applicazioni.
+\end{itemize}
+
+\subsubsection{Ring Deprivileging}
+Con Ring Deprivilenging si indica una situazione nel quale l'esecuzione di istruzioni privilegiate richieste dal sistema operativo nell'ambiente guest non
+possono essere eseguite in quanto richiederebbero un ring 0, ma il kernel della macchina virtuale esegue in un ring di livello superiore (foto telefono 1)
+
+Una possibile prima soluzione è il \textbf{Trap & Emulate}: nel quale se il guest tenta di eseguire un'istruzione privilegiata
+
+\begin{itemize}
+    \item la CPU notifica un'eccezione al VMM (\textbf{trap}) e gli trasferisce il controllo
+    \item il VMM controlla la correttezza dell'operazione richiesta e ne emula il comportamento (\textbf{emulate})
+\end{itemize}
+
+Quindi in poche parole la CPU notifica e delega al VMM il controllo e l'esecuzione dell'istruzione privilegiata.
+
+Esempio:
+
+Il guest tenta di disabilitare le interruzioni (popf), se la richiesta della macchina virtuale fosse eseguita direttamente sulla CPU sarebbero disabilitati
+tutti gli interrupt di sistema e quindi il VMM non potrebbe riottenere il controllo. Invece, con Trap&Emulate riceve la notifica di tale richiesta e ne emula
+il comportamento sospendendo gli interrupt solamente per la macchina virtuale richiedente.
+
+{\large \textbf{Supporto HW alla virtualizzazione}}
+L'archietettura della CPU si dice **naturalmente virtualizzabile** se e solo se prevede l'invio di trap al VMM per ogni istruzione privilegiata invocata da un
+livello di protezione differente dal quello del VMM.
+
+Se la CPU è naturalmente virtualizzabile viene implementato il trap&emulate, altrimenti, se non è virtualizzabile vi sono 2 possibilità: **Fast Binary Translation** e 
+**Paravirtualizzazione**.
+
+\subsubsection{Fast Binary Translation}
+Il VMM scansiona dinamicamente il codice dei sistemi operativi guest prima dell'esecuzione per sostituire a run time i blocchi contenenti istuzioni privilegiate
+in blocchi equivalenti dal punto di vista funzionale e contenenti chiamate al VMM. Inoltre i blocchi tradotti sono eseguiti e conservati in cache per eventuali
+riusi futuri. (SISTEMARE)
+
+(immagine slide 33)
+
+Il principale limite della Fast Binary Translation è che la traduzione dinamica è molto costosa. Però, con questa tecnica, ogni macchina virtuale è una esatta
+copia della macchina fisica, con la possiblità di installare gli stessi s.o. di architetture non virtualizzate.
+
+\subsubsection{Paravirtualizzazione}
+Il VMM (hypervison) offre al sistema operativo guest un'interfaccia virtuale (ovviamente differente da quello hardware del processore) chiamata **hypercall API**
+alla quale i s.o. guest devono rifersi per avere accesso alle risorse (system call).
+
+Queste Hypercall API permettono di:
+\begin{itemize}
+    \item richiedere l'esecuzione di istruzioni privilegiate, senza generare un interrupt al VMM
+    \item i kernel dei s.o. guest devono quindi essere modificati per avere accesso all'interfaccia del particolare VMM
+    \item la struttura del VMM è semplificata perchè non deve più preoccuparsi di tradurre dinamicamente i tentativi di operazioni privilegiate dei s.o. guest
+\end{itemize}
+
+Le prestazioni rispetto alla Fast Binary Translation sono notevolmente superiori, però ovviamente c'è una necessità di porting dei dei s.o. guest (non sempre facile).
+
+(aggiungere protezione processore)
 
 
 \section{La protezione nei Sistemi Operativi}
@@ -101,15 +176,13 @@ Ad esempio parti di codice utilizzati frequentemente vengono bufferizzati nella 
 \section{Programmazione Concorrente}
 
 
-\section{Modelli di Interazione tra i Processi}
+\section{Modello a memoria comune}
 
 Esistono 2 principali modelli di interazione tra i processi:
 \begin{itemize}
     \item Modello a \textbf{memoria comune} (ambiente globale, shared memory)
     \item Modello a \textbf{scambio di messaggi} (ambiente locale, distributed memory)
 \end{itemize}
-
-\subsection{Modello a memoria comune}
 
 Il modello a memoria comune rappresenta la più semplice astrazione del funzionamento di un sistema in multiprogrammazione costituito da uno o più processi che hanno accesso
 ad una memoria comune.
@@ -126,8 +199,7 @@ Le risorse vengono raggruppate in classi, dove una classe rappresenta l'insieme 
 Ovviamente ci deve essere la necessità di specificare quali processi ed in quali istanti possono accedere alla risorsa. Quindi il \textbf{meccanismo di controllo degli accessi}
 si occupa di controllare che gli accessi dei processi alle risorse avvengano correttamente.
 
-\vspace{5mm}
-\textbf{Gestore di una risorsa:}
+\subsection{Gestore delle Risorse}
 
 Per ogni risorsa \textbf{R}, il suo gestore definisce, in ogni istante t, \textbf{l'insieme SR(t) dei processi che, in tale istante, hanno il diritto di operare su R}.
 
@@ -140,6 +212,11 @@ Classificazione delle risorse:
     \item Risorsa R \textbf{allocata staticamente}: se SR(t) è una costante, quindi se SR(t) = SR(t0) per ogni t
     \item Risorsa R \textbf{allocata dinamicamente}: se SR(t) è funzione del tempo
 \end{itemize}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics{imgs/tipologie_allocazione.png}
+\end{figure}
 
 Per ogni risorsa \textbf{allocata staticamente}, l'insieme SR(t) è definito prima che il programma inizi la propria esecuzione; il gestore della risorsa è il programmatore che,
 in base alle regole del linguaggio, stabilisce quale processo può vedere e quindi operare su R.
@@ -156,7 +233,60 @@ Quindi i principali compiti del Gestore delle risorse sono:
     \item implementare la \textbf{startegia} di allocazione della risorsa e cioè definire quando, a chi e per quanto tempo allocare la risorsa.
 \end{itemize}
 
+\vspace{5mm}
+{\large \textbf{Accesso a Risorse}}
+Consideriamo un processo P che deve operare, ad un certo istante, su una risorsa R di tipo T:
 
+Se R è allocata \textbf{staticamente} a P (modalità A e B), il processo, se appartiene a SR, possiede diritto di operare su R in qualunque istante.
+\begin{lstlisting}
+R.op(...);
+\end{lstlisting}
 
+Se R è allocata \textbf{dinamicamente} a P (modalità C e D), è necessario prevedere un gestore GR, che implementa le funzioni di Richiesta e Rilascio della risorsa; quindi il
+processo P deve seguire il seguente protocollo:
+\begin{lstlisting}
+GR.Richiesta(...);  // acquisizione della risorsa
+R.op(...);          // esecuzione dell'operazione op su R
+GR.Rilascio(...);   // rilascio della risorsa R
+\end{lstlisting}
+
+Se R è allocata come \textbf{risorsa condivisa}, (modalità B e D) è necessario assicurare che gli accessi avvengano in modo non divisibile: nel senso che òe funzioni di accesso alla
+risorsa devono essere programmate come una \textbf{classe di sezioni critiche}, utilizzando meccanismi di sincronizzazione offerti dal linguaggio di programmazione e supportati
+dalla macchina concorrente.
+
+Se R è allocata come \textbf{risorsa dedicata}, (modalità A e C), essendo P l'unico processo che accede alla risorsa, non è necessario prevedere alcuna forma di sincronizzazione.
+
+\vspace{5mm}
+{\large \textbf{Regione critica condizionale [Hoare, Brinch-hansen]}}
+Formalismo che permette di esprimere la specifica di qualunque vincolo di sincronizzazione. Data una risorsa R condivisa:
+
+\begin{lstlistin}
+region R << Sa; when(C) Sb; >>
+\end{lstlisting}
+
+\begin{itemize}
+    \item tra doppie parentesi angolai il \textbf{corpo} della region che rappresenta un'operazione da eseguire su una risorsa condivisa R e quindi costituisce una sezione critica
+    che deve essere eseguita in \textbf{mutua esclusione} con le altre operazioni definite su R
+    \item il corpo della region è costituito da due istruzioni da eseguire in sequenza: l'istruzione \textbf{Sa} e successivamente l'istruzione \textbf{Sb}
+    \item in particolare, una volta terminata l'esecizione di Sa viene valutata la condizione \textbf{C}:
+    \begin{itemize}
+        \item se C è \textbf{vera} l'esecuzione continua con Sb
+        \item se C + \textbf{false} il processo che ha invocato l'operazione attende che la condizione C diventi vera. Non appena C sarà vera l'esecuzione della region potrà riprendere
+        ed eseguire Sb
+    \end{itemize}
+\end{itemize}
+
+Esistono però dei casi particolari di regioni critiche:
+\begin{itemize}
+    \item \textbf{region R << S; >>}: specifica della sola mutua esclusione, senza ulteriori vincoli
+    \item \textbf{region R << when(C) >>}: specifica di un semplice vincolo di sincronizzazione, nel quale il processo deve attendere che C sia verificata prima di proseguire
+    \item \textbf{region R << when(C) S; >>}: specifica il caso dìin cui la condizione C di sincronizzazione caratterizza lo stato in cui la risorsa R deve trovarsi per poter
+    eseguire l'operazione S (C quindi è una precondizione di S)
+\end{itemize}
+
+\subsection{Mutua Esclusione}
+
+Il probelma della mutua esclusione nasce quando più di un processo alla volta può e deve accedere a variabili comuni. Quindi è di fondamentale importanza che le operazioni con le quali
+i processi accedono alle variabili comuni non si sovrappongano nel tempo.
 
 \end{document}
