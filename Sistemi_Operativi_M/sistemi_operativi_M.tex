@@ -1,7 +1,34 @@
 \documentclass{article}
 \usepackage[utf8]{inputenc}
 \usepackage{listings}
+\usepackage{parcolumns}
 \usepackage{graphicx}
+\usepackage[usenames,dvipsnames,svgnames,table]{xcolor}
+
+\setlength\parindent{0pt}
+
+\lstset{language=Java}
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+tabsize = 4,
+showstringspaces = false,
+numbers = left, 
+commentstyle = \color{green},
+keywordstyle = \color{blue}, 
+stringstyle = \color{red}, 
+rulecolor = \color{black}, 
+basicstyle = \small \ttfamily ,
+breaklines = true,
+numberstyle = \tiny,
+frame = shadowbox,
+postbreak = \raisebox{0ex}[0ex][0ex]{\ensuremath{\hookrightarrow}}
+}
+
+\lstset{style=mystyle}
 
 \title{Sistemi Operativi M}
 \author{Federico Andrucci}
@@ -96,7 +123,7 @@ Ad esempio parti di codice utilizzati frequentemente vengono bufferizzati nella 
 
 \subsubsection{Ring di protezione}
 
-La CPU prevede due livelli di protezione: \textbf{supervisore o kernel (0)} e \textbf{utente (>0)}.
+La CPU prevede due livelli di protezione: \textbf{supervisore o kernel (0)} e \textbf{utente ($<$0)}.
 
 Ogni ring corrisponde a una diversa modalità di funzionamento del processore:
 \begin{itemize}
@@ -106,7 +133,9 @@ Ogni ring corrisponde a una diversa modalità di funzionamento del processore:
 
 Alcuni progrmmi sono progettati per eseguire nel ring 0, ad esempio il Kernel del S.O. infatti è l'unico componente che ha pieno controllo dell'hardware.
 
-{\large \textbf{VMM (vmm di sistema)}}
+\vspace{3mm}
+\textbf{VMM (vmm di sistema)}
+
 In un sistema virtualizzato il VMM deve essere l'unica componente in grado di mantenere il controllo completo dell'hardware. Infatti solo il VMM opera nello stato supervisore, 
 mentre il S.O. e le applicazioni eseguono in un ring di livello superiore.
 
@@ -121,7 +150,7 @@ Sorgono però due problemi:
 Con Ring Deprivilenging si indica una situazione nel quale l'esecuzione di istruzioni privilegiate richieste dal sistema operativo nell'ambiente guest non
 possono essere eseguite in quanto richiederebbero un ring 0, ma il kernel della macchina virtuale esegue in un ring di livello superiore (foto telefono 1)
 
-Una possibile prima soluzione è il \textbf{Trap & Emulate}: nel quale se il guest tenta di eseguire un'istruzione privilegiata
+Una possibile prima soluzione è il \textbf{Trap \& Emulate}: nel quale se il guest tenta di eseguire un'istruzione privilegiata
 
 \begin{itemize}
     \item la CPU notifica un'eccezione al VMM (\textbf{trap}) e gli trasferisce il controllo
@@ -133,15 +162,17 @@ Quindi in poche parole la CPU notifica e delega al VMM il controllo e l'esecuzio
 Esempio:
 
 Il guest tenta di disabilitare le interruzioni (popf), se la richiesta della macchina virtuale fosse eseguita direttamente sulla CPU sarebbero disabilitati
-tutti gli interrupt di sistema e quindi il VMM non potrebbe riottenere il controllo. Invece, con Trap&Emulate riceve la notifica di tale richiesta e ne emula
+tutti gli interrupt di sistema e quindi il VMM non potrebbe riottenere il controllo. Invece, con Trap\&Emulate riceve la notifica di tale richiesta e ne emula
 il comportamento sospendendo gli interrupt solamente per la macchina virtuale richiedente.
 
-{\large \textbf{Supporto HW alla virtualizzazione}}
-L'archietettura della CPU si dice **naturalmente virtualizzabile** se e solo se prevede l'invio di trap al VMM per ogni istruzione privilegiata invocata da un
+\vspace{3mm}
+\textbf{Supporto HW alla virtualizzazione}
+
+L'archietettura della CPU si dice \textbf{naturalmente virtualizzabile} se e solo se prevede l'invio di trap al VMM per ogni istruzione privilegiata invocata da un
 livello di protezione differente dal quello del VMM.
 
-Se la CPU è naturalmente virtualizzabile viene implementato il trap&emulate, altrimenti, se non è virtualizzabile vi sono 2 possibilità: **Fast Binary Translation** e 
-**Paravirtualizzazione**.
+Se la CPU è naturalmente virtualizzabile viene implementato il trap\&emulate, altrimenti, se non è virtualizzabile vi sono 2 possibilità: \textbf{Fast Binary Translation} e 
+\textbf{Paravirtualizzazione}.
 
 \subsubsection{Fast Binary Translation}
 Il VMM scansiona dinamicamente il codice dei sistemi operativi guest prima dell'esecuzione per sostituire a run time i blocchi contenenti istuzioni privilegiate
@@ -171,6 +202,167 @@ Le prestazioni rispetto alla Fast Binary Translation sono notevolmente superiori
 
 \section{La protezione nei Sistemi Operativi}
 
+\textbf{Sicurezza}: riguarda l'insieme delle tecniche per regolamentare l'accesso degli utenti al sistema di elaborazione. La sicurezza impedisce accessi
+non autorizzati al sistema e i conseguenti tentativi dolosi di alterazione e distruzione di dati.
+
+\vspace{3mm}
+\textbf{Protezione}: insieme di attività volte a garantire il controllo dell'accesso alle risorse logiche e fisiche da parte degli utenti autorizzati
+all'uso di un sistema di calcolo.
+
+La sicurezza mette a disposizione meccanismi di **identificazione, autenticazione, ...**
+
+Per rendere un sistema sicuro è necessario stabilire per ogni utente autorizzato:
+\begin{itemize}
+    \item quali siano le risore alle quali può accedere
+    \item con quali operazioni può accedervi
+\end{itemize}
+
+Tutto ciò è stabilito dal sistema di protezione attraverso delle tecniche di controllo dell'accesso.
+
+In un sistema il controllo degli accessi si esprime tramite la definizione di tre livelli concettuali:
+\begin{itemize}
+    \item modelli
+    \item politiche
+    \item meccanismi
+\end{itemize}
+
+\vspace{3mm}
+\textbf{Modelli:}
+
+Un modello di protezione definisce i soggetti, gli oggetti e i diritti d'accesso:
+\begin{itemize}
+    \item \textbf{oggetti}: costituiscono la parte passiva, cioè le risorse fisiche e logiche alle quali si può accedere e su cui si può operare.
+    \item \textbf{soggetti}: rappresentano la parte attiva di un sistema, cioè le eintità che possono richiedere l'accesso alle risorse (utenti e processi)
+    \item \textbf{diritti d'accesso}: sono le operazioni con le quali è possibile operare sugli oggetti
+\end{itemize}
+
+(Un soggetto può avere diritti d'accesso sia per gli oggetti che per gli altri soggetti)
+
+Ad ogni soggetto è associato un \textbf{dominio di protezione}, che rappresenta l'ambiente di protezione nel quale il soggetto esegue. Quindi il dominio
+indica i diritti d'accesso posseduti dal sogetto nei confronti di ogni risorsa.
+
+Un dominio di protezioen è unico per ogni soggetto, mentre un processo può eventualmente cambiare dominio durante la sua esecuzione.
+
+\vspace{3mm}
+\textbf{Politiche:}
+
+Le \textbf{politiche di protezione} definiscono le regole con le quali i soggetti possono accedere agli oggetti
+Classificazione delle politiche:
+\begin{itemize}
+    \item \textbf{discretional access control (DAC)}: il creatore di un oggetto controlla i diritti di accesso per quell'oggetto (unix). La definizione delle politiche è
+    decentralizzata.
+    \item \textbf{mandatory access control (MAC)}: i diritti di accesso vengono definiti in modo centralizzato. Ad esempio in installazioni di alta sicurezza
+    \item \textbf{role based access control (RBAC)}: ad un ruolo sono assegnati specifici diritti di accesso sulle risorse. Sli utenti possono appartenere a diversi
+    ruoli. I diritti attribuiti ad ogni ruolo vengono assegnati in modo centralizzato
+\end{itemize}
+
+\vspace{3mm}
+\textbf{Principio del privilegio minimo}: ad ogni soggetto sono garantiti i diritti d'accesso solo agli oggetti strettamente necessari per la sua esecuzione
+(POLA: principle of least authority). il POLA è una caratteristicha desiderabile in ogni sistema di controllo.
+\vspace{3mm}
+
+\textbf{Meccanismi:}
+
+I \textbf{meccanismi di protezione} sono gli strumenti necessari a mettere in atto una determinata politica.
+Principi di realizzazione:
+\begin{itemize}
+    \item \textbf{Flessibilità del sistema di protezione}: i meccanismi devono essere sufficientemente generali per consentire l'applicazione di diverse politiche 
+    di protezione
+    \item \textbf{Separazione tra meccanismi e politiche}: la politicha definische "cosa va fatto" ed il meccanismo "come va fatto". Ovviamente è desiderata la
+    massima indipendenza tra le due componenti.
+\end{itemize}
+
+#### Dominio di protezione
+Un dominio definisce un insiem edi coppie, ognuna contenente l'identificatore di un oggetto e l'insieme delle operazioni che il soggetto associato al
+dominio può eseguire su ciascun oggetto
+
+$$ D(S) = {<o, diritti> | o è un oggetto, diritti è un insieme di operazioni} $$
+
+
+#### Modello di Grahmm-Denning
+Questo modello forsnisce una serie di comandi che garantiscono la modifica controllata dello stato di protezione:
+- create object
+- delete object
+- create subject
+- delete subject
+- read access right
+- grant access right
+- delete access right
+- tranfer access right
+
+##### Diritti
+**Diritto Owner**:
+Il diritto owner permette l'assegnazioen di qualunque diritto di accesso su un oggetto X ad un qualunque soggetto Sj da parte di un soggetto Si. L'operazione è consentita solo
+se il diritto owner appartiene a A[Si, X]
+
+**Diritto Control**:
+Eliminazione di un diritto di accesso per un oggetto X nel dominio di Sj da parte di Si. L'operazione è consentita solo se il diritto control appartiene a A[Si, Sj], oppure owner
+appartiene a A[Si, X].
+
+**Cambio di dominio: switch**
+Il cambio di dominio permette che un processo che esegue nel dominio del soggetto si può commutare al dominio di un altro soggetto Sj.
+L'operazione è consentita solo se il diritto switch appartiene a A[Si, Sj].
+
+#### Realizzazione della matrice delgi accessi
+La matrice degli accessi è una notazione astratta che rappresenta lo stato di protezione. Nella rappresentazione concreta è necessario considerare: la dimensione della matrice e matrice 
+sparsa.
+
+La rappresentazione concreta della matrice degli accessi deve essere ottimizzata sia riguardo all'occupazione di memoria sia rispetto all'efficienza nell'accesso e nella gestione della
+informazioni di protezione.
+Ci sono principalmente di approcci:
+- **Access Control List (ACL)**: rappresentazione per colonne, per ogni oggetto è associata una lista che contiene tutti i soggetti che possono accedere all'oggetto, con i relativi diritti
+    d'accesso per l'oggetto
+- **Capability List**: rappresentazione per righe, ad ognin soggetto è associata una lista che contiene gli oggetti accessibili dal soggetto ed i relativi diritti d'accesso.
+
+##### Access Control List
+La lista degli accessi per ogni oggetto è rappresentata dall'insieme delle coppie: **<soggetto, insieme dei diritti>**
+limitatamente ai soggetti con un insieme non vuoto di diritti per l'oggetto.
+Quando deve essere eseguita un'operazione M su un oggetto Oj, da parte di Si, si cerca nella lista degli accessi **<Si, Rk>, con M appartenente a Rk**
+La ricerca può essere fatta preventivamente in una lista di default contenete i diritti di accesso applicabili a tutti gli oggetti. 
+Se in entrambi i casi la risposta è negativa, l'accesso è negato.
+
+**Utenti e Gruppi**
+Generalmente ogni soggetto rappresenta un singolo utente. Molti sistemi hanno il concetto di **gruppo di utenti**. I gruppi hanno un nome e possono essere inclusi nella ACL.
+In questo caso l'entry in ACL ha la forma:
+**UID_1, GID_1 : <insieme di diritti>**
+**UID_2, GID_2 : <insieme di diritti>**
+Dove UID è lo user identifier e GID è il group identifier.
+
+In certi casi il gruppo identifica un ruolo: uno stesso utente può appartenere a gruppi diversi e quindi  con diritti diversi. In questo caso, quando un utente accede, specifica il
+gruppo di appartenenza.
+
+##### Capability List
+La lista delle capability, per ogni soggetto, è la lista di elementi ognuno dei quali:
+- è associato a un oggetto a cui il soggetto può accedere
+- contiene i diritti di accessi consentiti su tale oggetto
+
+Ogni elemento della lista prende il nome di **capability**. Il quale di compone di un identificatore (o un indirizzo) che indica l'oggetto e la rappresentazione dei vari diritti d'accesso.
+Quando S intende eseguire un'operazione M su un oggetto Oj: il meccanismo di protezione controlla se nella lisra delle capability associata a S ne esiste una relativa ad Oj che abbia
+tra i suoi diritti M.
+
+Ovviamente le Capability List devono essere protette da manomissioni, ed è possibile in diversi modi:
+- la capability list viene gestita solamente da s.o.; l'utente fa riferimento ad un puntatore (capability) che identifica la sua posizione nella lista appartenete allo spazio del kerner
+- Architettura etichettata: a livello HW, ogni singola parola ha bit extra, che esprimono la protezione su quella cella di memoria. Ad esempio, se è una capability, deve essere
+protetta da scritture non autorizzate.
+I bit tag non sono utilizzari dall'aritmetica, dai confronti e da altre istruzioni normali e può essere modificato solo da programmi che agiscono in modo kernel.
+
+##### Revoca dei diritti di accesso
+In un sistema di protezione dinamica può essere necessario revocare i diritti d'accesso per un oggetto. La revoca può essere di tre tipi:
+- **generale o selettiva**: cioè valere per tutti gli utenti che hanno quel diritto di accesso o solo per un gruppo
+- **parziale o totale**: cipè riguardare un sottoinsieme di diritti per l'oggetto, o tutti
+- **temporanea o permanente**: cioè il diritto di accesso non sarà più disponibile, oppure potrà essere successivamente riottenuto
+
+**Revoca del diritto per un oggetto con ACL**:
+Si fa riferimento alla ACL associata all'oggetto e si cancellano i diritti di accesso che si vogliono revocare
+
+**Revoca del diritto per un oggetto con Capability List**:
+Più complicato rispetto ad ACL. È necessario verificare per ogni dominio se contiene la capability con riferimento all'oggetto considerato.
+
+
+..
+..
+..
+..
 
 
 \section{Programmazione Concorrente}
@@ -215,11 +407,12 @@ Classificazione delle risorse:
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics{imgs/tipologie_allocazione.png}
+    \includegraphics[width=0.50\columnwidth]{imgs/tipologie_allocazione.png}
 \end{figure}
 
 Per ogni risorsa \textbf{allocata staticamente}, l'insieme SR(t) è definito prima che il programma inizi la propria esecuzione; il gestore della risorsa è il programmatore che,
 in base alle regole del linguaggio, stabilisce quale processo può vedere e quindi operare su R.
+
 
 Per ogni risorsa \textbf{allocata dinamicamente}, il relativo gestore GR definisce l'insieme SR(t) in fase di esecuzione e quindi deve essere un componente della stessa applicazione,
 nel quale l'allocazione viene decisa a run-time in base a politiche date.
@@ -238,34 +431,39 @@ Quindi i principali compiti del Gestore delle risorse sono:
 Consideriamo un processo P che deve operare, ad un certo istante, su una risorsa R di tipo T:
 
 Se R è allocata \textbf{staticamente} a P (modalità A e B), il processo, se appartiene a SR, possiede diritto di operare su R in qualunque istante.
+\vspace{3mm}
 \begin{lstlisting}
 R.op(...);
 \end{lstlisting}
 
 Se R è allocata \textbf{dinamicamente} a P (modalità C e D), è necessario prevedere un gestore GR, che implementa le funzioni di Richiesta e Rilascio della risorsa; quindi il
 processo P deve seguire il seguente protocollo:
+
+\vspace{3mm}
 \begin{lstlisting}
 GR.Richiesta(...);  // acquisizione della risorsa
 R.op(...);          // esecuzione dell'operazione op su R
 GR.Rilascio(...);   // rilascio della risorsa R
 \end{lstlisting}
 
+\vspace{3mm}
 Se R è allocata come \textbf{risorsa condivisa}, (modalità B e D) è necessario assicurare che gli accessi avvengano in modo non divisibile: nel senso che òe funzioni di accesso alla
 risorsa devono essere programmate come una \textbf{classe di sezioni critiche}, utilizzando meccanismi di sincronizzazione offerti dal linguaggio di programmazione e supportati
 dalla macchina concorrente.
 
+\vspace{3mm}
 Se R è allocata come \textbf{risorsa dedicata}, (modalità A e C), essendo P l'unico processo che accede alla risorsa, non è necessario prevedere alcuna forma di sincronizzazione.
 
 \vspace{5mm}
 {\large \textbf{Regione critica condizionale [Hoare, Brinch-hansen]}}
 Formalismo che permette di esprimere la specifica di qualunque vincolo di sincronizzazione. Data una risorsa R condivisa:
 
-\begin{lstlistin}
+\begin{lstlisting}
 region R << Sa; when(C) Sb; >>
 \end{lstlisting}
 
 \begin{itemize}
-    \item tra doppie parentesi angolai il \textbf{corpo} della region che rappresenta un'operazione da eseguire su una risorsa condivisa R e quindi costituisce una sezione critica
+    \item tra doppie parentesi angolai il \textbf{corpo} della region che rappresenta una operazione da eseguire su una risorsa condivisa R e quindi costituisce una sezione critica
     che deve essere eseguita in \textbf{mutua esclusione} con le altre operazioni definite su R
     \item il corpo della region è costituito da due istruzioni da eseguire in sequenza: l'istruzione \textbf{Sa} e successivamente l'istruzione \textbf{Sb}
     \item in particolare, una volta terminata l'esecizione di Sa viene valutata la condizione \textbf{C}:
@@ -278,9 +476,9 @@ region R << Sa; when(C) Sb; >>
 
 Esistono però dei casi particolari di regioni critiche:
 \begin{itemize}
-    \item \textbf{region R << S; >>}: specifica della sola mutua esclusione, senza ulteriori vincoli
-    \item \textbf{region R << when(C) >>}: specifica di un semplice vincolo di sincronizzazione, nel quale il processo deve attendere che C sia verificata prima di proseguire
-    \item \textbf{region R << when(C) S; >>}: specifica il caso dìin cui la condizione C di sincronizzazione caratterizza lo stato in cui la risorsa R deve trovarsi per poter
+    \item \textbf{region R $<<$ S; $>>$}: specifica della sola mutua esclusione, senza ulteriori vincoli
+    \item \textbf{region R $<<$ when(C) $>>$}: specifica di un semplice vincolo di sincronizzazione, nel quale il processo deve attendere che C sia verificata prima di proseguire
+    \item \textbf{region R $<<$ when(C) S; $>>$}: specifica il caso dìin cui la condizione C di sincronizzazione caratterizza lo stato in cui la risorsa R deve trovarsi per poter
     eseguire l'operazione S (C quindi è una precondizione di S)
 \end{itemize}
 
@@ -288,5 +486,562 @@ Esistono però dei casi particolari di regioni critiche:
 
 Il probelma della mutua esclusione nasce quando più di un processo alla volta può e deve accedere a variabili comuni. Quindi è di fondamentale importanza che le operazioni con le quali
 i processi accedono alle variabili comuni non si sovrappongano nel tempo.
+
+\vspace{3mm}
+Con sezione critica s'intende la sequenza di istruzioni con le quali un processo accede e modifica un insieme di variabili comuni. Ad un insieme di variabili comuni possono
+essere associate una sola sezione critica (usata da tutti i processi) oppure più sezioni critiche (classe di sezioni critiche).
+
+La regola della mutua esclusione stabilisce che:
+\begin{center}
+    \textbf{Sezioni critiche appartenenti alla atessa classe devono escludersi mutuamente nel tempo.}
+    \vspace{3mm}
+
+    oppure
+
+    \vspace{3mm}
+    \textbf{Ad ogni istante può essere "in esecuzione" al più una sezione critica di ogni classe.}
+\end{center}
+
+\vspace{3mm}
+Per specificare una sezione critica \textbf{S} che opera su una risorsa condivisa R:
+
+\begin{lstlisting}
+    <prologo>
+        S;
+    <epilogo>
+\end{lstlisting}
+
+Attraverso il \textbf{prologo} si ottiene l'autorizzazione ad eseguire la sezione critica, quindi R viene acquisita in modo esclusivo. Invece attraverso l'\textbf{epilogo}
+la risorsa R viene liberata.
+
+\vspace{5mm}
+Le principali soluzioni possibili alla mutua esclusine sono:
+\begin{itemize}
+    \item \textbf{Algoritmiche:} (es. Algoritmi di Dekker, ecc.) la soluzione non necessita di meccanismi di sincronizzazione (es. semafori, lock, ecc.), ma sfrutta
+    solo la possibilità di condivisione di variabili; l'attesa di un processo che trova la variabile condivisa già occupata viene modellata attraverso cicli di attesa attiva
+    \item \textbf{Hardware-based:} ad esempio disabilitazione delle interruzioni, lock/unlock. Quindi il supporto è fornito direttamente dall'architettura HW.
+    \item \textbf{Strumenti software di sincronizzazione realizzati dal nucleo della macchina concorrente:} prologo ed epilogo sfruttano strumenti di sincronizzazione
+    che consentono l'effettiva sospensione dei processi in attesa ed eseguire sezioni critiche.
+\end{itemize}
+
+\subsection{Strumenti linguistici per la programmazione di interazioni}
+\subsubsection{Il Semaforo}
+
+Il semaforo è uno strumento linguistico di basso livello che consente di risolvere qualunque problema di sincronizzazione nel modello a memoria comune.
+
+E\' realizzato dal nucleo della macchina concorrente. L'eventuale attesa nella esecuzione può essere realizzata utilizzando i meccanismi di gestione dei thread offerti
+dal nucleo. Inoltre viene utilizzato per realizzaer strumenti di sincronizzazione di puù alto livello ad esempio le \textit{condition}.
+
+\vspace{3mm}
+\textbf{Definizione:} un semaforo è una \textbf{variabile intera non negativa}, alla quale è possibile accedere solo \textbf{tramite le due operazioni P e V}.
+\vspace{3mm}
+
+Definizione di un oggetto di tipo \textbf{semaphore}:
+\begin{lstlisting}
+    semaphore s = i;    // dove i (i >= 0) è il valore iniziale
+\end{lstlisting}
+
+Al tipo semaphore sono associati:
+\begin{center}
+    Insieme di valori = $\{X | X \in N\}$
+    \vspace{3mm}
+
+    Insieme delle operazioni = $\{P, V\}$
+\end{center}
+
+\vspace{5mm}
+\textbf{Operazioni sul semaforo}
+\vspace{3mm}
+
+Un oggetto di tipo semaphore è condivisibile da due o più threads, che operano su di esso attraverso le operazioni \textbf{P} e \textbf{V}.
+
+\begin{lstlisting}
+    void P(semaphore s):
+        region s << when(val_s > 0) val_s--; >>
+
+    void V(semaphore s):
+        region s << val_s++; >>
+
+    // dove val_s rappresenta il valore del semaforo
+\end{lstlisting}
+
+Essendo \textbf{s} l'oggetto condiviso, le due operazioni P e V vengono definite come \textbf{sezioni critiche} da eseguire in mutua esclusione e in forma atomica.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.50\columnwidth]{imgs/operazioni_semaforo.PNG}
+\end{figure}
+
+Quindi il semaforo viene utilizzato come strumento di sincronizzazione tra processi concorrenti:
+\begin{itemize}
+    \item \textbf{attesa}: P(s), val-s == 0
+    \item \textbf{risveglio}: V(s), se vi è almeno un processo sospeso
+\end{itemize}
+
+\vspace{5mm}
+\textbf{Proprietà del Semaforo}
+\vspace{3mm}
+Dato un semaforo S, siano:
+\begin{itemize}
+    \item \textbf{$val_s$}: valore dell'intero non negativo associato al semaforo;
+    \item \textbf{$I_s$}: valore intero \>= 0 con cui il semaforo s viene inizializzato;
+    \item \textbf{$nv_s$}: numero di volte che l'operazione V(s) è stata eseguita;
+    \item \textbf{$np_s$}: numero di volte che l'operazione P(s) è stata completata.
+\end{itemize}
+
+\vspace{3mm}
+Ad ogni istante possiamo esprimere il valore del semafor come:
+\begin{center}
+    $val_s = I_s + nv_s - np_s$
+\end{center}
+
+da cui ($val_s >= 0$):
+
+\begin{center}
+    \textbf{Relazione di Invarianza}
+
+    \textbf{$np_s <= I_s + nv_s$}
+\end{center}
+
+La relazione di invarianza è sempre soddisfatta, per ogni semaforo, qualunque sia il suo valore e comunque sia strutturato il programma concorrente che lo usa.
+
+\vspace{5mm}
+Il semaforo è quindi uno strumento generale che consente la risoluzione di qualunque problema di sincronizzazione.
+
+Esistono molti casi d'uso del meccanismo semaforico:
+\begin{itemize}
+    \item semafori di mutua esclusione
+    \item semafori evento
+    \item semafori binari composti
+    \item semafori condizione
+    \item semafori risorsa
+    \item semafori privati
+\end{itemize}
+
+\vspace{5mm}
+\textbf{Semaforo di mutua esclusione}
+
+\vspace{3mm}
+Il semaforo di mutua esclusione viene inizializzato ad 1. Principalmente viene utilizzato per realizzare le sezioni critiche di una stessa classe, secondo il protocollo:
+
+\begin{lstlisting}
+    class tipo_risorsa {
+        <struttura dati di ogni istanza della classe>;
+
+        semaphore mutex = 1;
+
+        public void op1() {
+            P(mutex);   // prologo
+            <sezione critica: corpo della funzione op1>;
+            V(mutex);   // epilogo
+        }
+
+        public void opN() {
+            P(mutex);   // prologo
+            <sezioen critica: corpo della funzione opN>;
+            V(mutex);   // epilogo
+        }
+    }
+
+    tipo_risorsa ris;
+    ris.opi();
+\end{lstlisting}
+
+(il semaforo di mutua esclusione può assumere solo i valori 0 e 1)
+
+\vspace{3mm}
+In alcuni casi è consentito a più processi di eseguire contemporaneamente la stessa operazione su una risorsa, ma non operazioni diverse.
+
+Quindi una soluzione protrebbe essere:
+\begin{itemize}
+    \item definisco un semaforo mutex per la mutua esclusione tra operazioni
+    \item prologo ed epilogo di $op_i$ sono sezioni critiche quindi introduco un ulteriore semaforo di mutua esclusione $m_i$
+\end{itemize}
+
+Un esempio potrebbe essere il \textbf{problema dei lettori/scrittori}.
+
+Sia data una risorsa condivisa F (ad esmepio un file) che può essere acceduta dai thread concorrenti in due modi:
+\begin{itemize}
+    \item \textbf{lettura};
+    \item \textbf{scrittura}
+\end{itemize}
+
+\vspace{3mm}
+Una possibile soluzione di sincronizzazione potrebbe essere:
+\begin{itemize}
+    \item la lettura è consentita a più thread contemporaneamente;
+    \item la scrtittura è consentita ad un thread alla volta;
+    \item lettura e scrittura su F non possono avvenire contemporaneamente
+\end{itemize}
+
+\begin{lstlisting}
+    semaphore mutex = 1;
+    semaphore ml = 1;
+    int contl = 0;
+
+    public void lettura(...) {
+        P(ml);
+        contl++;
+
+        if(contl == 1) {
+            P(mutex);
+        }
+
+        V(ml);
+        <lettura del file>;
+        P(ml);
+        contl--;
+
+        if(contl == 0) {
+            V(mutex);
+        }
+
+        v(ml);
+    }
+
+    public void scrittura(...) {
+        P(mutex);
+        <scrittura del file>;
+        V(mutex);
+    }
+\end{lstlisting}
+
+\vspace{5mm}
+\textbf{Semaforo evento}
+
+\vspace{3mm}
+Un semaforo evento è un semaforo binario utilizzato per imporre un \textbf{vincolo di precedenza} tra le operazioni dei processi. 
+(ad es. $op_a$ deve essere eseguita da P1 solo dopo che P2 ha eseguito $op_b$).
+
+\vspace{3mm}
+Introduciamo quindi un semaforo \textbf{sem} inizializzato a \textbf{zero}:
+\begin{itemize}
+    \item prima di eseguire $op_a$, P1 esegue P(sem)
+    \item dopo aver eseguito $op_b$, P2 esegue V(sem)
+\end{itemize}
+
+{
+    problema del rendez-vous slide 48
+}
+
+\vspace{5mm}
+\textbf{Semafori binari composti}
+
+\vspace{3mm}
+Un insieme di semafori usato in modo tale che:
+\begin{itemize}
+    \item uno solo di essi sia inizializzato a 1 e tutti gli altri a 0
+    \item ogni processo che usa questi semafori esegue sempre sequenze che iniziano con la P su uno di questi e termina con la V su un altro.
+\end{itemize}
+
+Due processi P1 e P2 si scambiano dati di tipo T utilizzando una memoria condivisa (buffer).
+
+Quindi devono esserci dei vincoli di sincronizzazione:
+\begin{itemize}
+    \item accessi al buffer mutuamente esclusivi
+    \item P2 può prelevare un dato solo dopo che P1 lo abbia inserito
+    \item P1, prima di inserire un dato, deve attendere che P2 abbia estratto il precedente
+\end{itemize}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.60\columnwidth]{imgs/vincoli_precendenza.PNG}
+\end{figure}
+
+\vspace{3mm}
+Utilizziamo quindi due semafori:
+\begin{itemize}
+    \item \textbf{vu}, per realizzare l'attesa di P1, in caso di buffer pieno
+    \item \textbf{pn}, per realizzare l'attesa di P2, in caso di buffer vuoto
+\end{itemize}
+
+\vspace{3mm}
+Buffer inizialmente vuoto, vu = 1, pn = 0
+\vspace{3mm}
+
+\noindent\begin{minipage}{.45\columnwidth}
+    \begin{lstlisting}
+        void invio(T dato) {
+            P(vu);
+            inserisci(dato);
+            V(pn);
+        }
+    \end{lstlisting}
+\end{minipage}\hfill
+\begin{minipage}{.45\columnwidth}
+    \begin{lstlisting}
+        T ricezione() {
+            T dato;
+            P(pn);
+            dato = estrai();
+            V(vu);
+            return dato;
+        }
+    \end{lstlisting}
+\end{minipage}
+
+\vspace{5mm}
+\textbf{Semaforo condizione}
+
+\vspace{3mm}
+In alcuni casi l'esecuzione di un'istruzione S1 su una risorsa R è subordinata al verificarsi di una condizione C:
+
+\begin{lstlisting}
+    void op1(): region R << when(C) S1; >>
+\end{lstlisting}
+
+\vspace{3mm}
+Il processo deve sospendersi se la condizione non è verificata e deve sucire dalla regione per consentire ad altri processi di eseguire altre operazioni su R
+per rendere vera la condzione C.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.70\columnwidth]{imgs/schema_condizione.PNG}
+\end{figure}
+
+\begin{itemize}
+    \item Lo schema (a) presuppone una forma di attesa attiva da parte del processo che non trova soddisfatta la condizione
+    \item Nello schema (b) si realizza la region sospendendo il processo sul semaforo sem da associare alla condizione.
+    \begin{itemize}
+        \item è necessaria un'altra operazione op2 che, chiamata da un'altro processo, modifichi lo stato interno di R in modo che C diventi vera
+        \item nell'ambito di op2 viene eseguita la V(sem) per risvegliare il processo
+    \end{itemize}
+\end{itemize}
+
+\vspace{3mm}
+Schema con \textbf{attesa circolare}
+
+\begin{lstlisting}
+semaphore mutex = 1;
+semaphore sem = 0;
+int csem = 0;
+\end{lstlisting}
+
+\noindent\begin{minipage}{.45\columnwidth}
+    \begin{lstlisting}
+public void op1() {
+    P(mutex);
+    while(!C) {
+        csem++;
+        V(mutex);
+        P(sem);
+        P(mutex);
+    }
+    S1;
+    V(mutex);
+}
+    \end{lstlisting}
+\end{minipage}\hfill
+\begin{minipage}{.45\columnwidth}
+    \begin{lstlisting}
+public void op2() {
+    P(mutex);
+    S2;
+    if(csem > 0) {
+        csem--;
+        V(sem);
+    }
+    V(mutex);
+}
+    \end{lstlisting}
+\end{minipage}
+
+\vspace{3mm}
+Schema con \textbf{passaggio di testimone}:
+
+\begin{lstlisting}
+semaphore mutex = 1;
+semaphore sem = 0;
+int csem = 0;
+\end{lstlisting}
+
+\noindent\begin{minipage}{.45\columnwidth}
+    \begin{lstlisting}
+public void op1() {
+    P(mutex);
+    if(!C) {
+        csem++;
+        V(mutex);
+        P(sem);
+        csem--;
+    }
+    S1;
+    V(mutex);
+}
+    \end{lstlisting}
+\end{minipage}\hfill
+\begin{minipage}{.45\columnwidth}
+    \begin{lstlisting}
+public void op2() {
+    P(mutex);
+    S2;
+    if(C && csem > 0) {
+        V(sem);
+    } else {
+        V(mutex);
+    }
+}
+    \end{lstlisting}
+\end{minipage}
+
+\vspace{3mm}
+Questo secondo schema è più efficientre del primo ma ha comunque delle limitazioni. Permette di risvegliare un solo processo alla volta poichè ad uno solo può passare
+il diritto di operare in mutua esclusione. Inoltre la condizione C (precondizione di S1) deve essere verificabile anche all'interno di op2. Ciò significa che
+non deve contenere variabili locali o parametri della funzione op1.
+
+\vspace{5mm}
+\textbf{Semaforo condizione}
+
+\vspace{3mm}
+I semafori risorsa sono semafori generali, quindi possono assumere qualunque valore >= 0. Vengono generalmente impiegati per realizzare l'allocazione di risorse
+equivalenti, nel quale il valore del semaforo rappresenta il numero di risorse libere.
+
+\vspace{3mm}
+\begin{lstlisting}
+class tipo_gestore {
+    semaphore mutex = 1;    // semaforo di mutua esclusione
+    semaphore n_ris = N;    // semaforo risorsa
+    boolean libera[N];      // indicatori di risorsa libera
+
+    public tipo_gestore() {
+        for(int i = 0; i < N; i++) {
+            libera[i] = true;   // inizializzazione
+        }
+    }
+
+    public int richiesta() {
+        int i = 0;
+        P(n_ris);
+        P(mutex);
+        while(libera[i] == false) {
+            i++;
+        }
+        libera[i] = false;
+        V(mutex);
+        return i;
+    }
+
+    public ovid rilascio(int r) {
+        P(mutex);
+        libera[r] = true;
+        V(mutex);
+        V(n_ris);
+    }
+}
+\end{lstlisting}
+
+\vspace{3mm}
+Leggere esempi sulle condizioni di sincronizzazione.
+
+\vspace{5mm}
+\textbf{Semaforo condizione}
+
+\vspace{3mm}
+Un semaforo S si deive privato per un processo quando solo tale processo può eseguire la primitiva P sul semaforo S. La primitiva V sul semaforo può essere invece eseguita
+da qualunque processo. Generalmente un semaforo privato viene inizalizzato con il valore zero.
+
+\vspace{3mm}
+I semafori privati vengono utilizzati per realizzare particolari politiche di allocazione di risorse:
+\begin{itemize}
+    \item il processo che acquisisce la risorsa può eventualmente sospendersi sul suo semaforo privato (se la condizione di sincronizzazione non è rispettata)
+    \item chi rilascia la risorsa, risveglierà uno tra i processi sospesi, in base alla politica scelta, mediante una V sul semaforo privato del processo scelto.
+\end{itemize}
+
+\vspace{3mm}
+Allocazione di risorse, \textbf{primo schema}:
+
+\begin{lstlisting}
+class tipo_gestore_risorsa {
+    <struttura dati del gestore>;
+    semaphore mutex = 1;
+    semaphore priv[n] = {0, 0, ..., 0}; // semafori privati
+
+    public void acquisizione(int i) {
+        P(mmutex);
+        if(<condizione di sincronizzazione>) {
+            <allocazione della risorsa>;
+            V(priv[i]);
+        } else {
+            <registra la sospensione del processo>;
+        }
+        V(mutex);
+        P(priv(i));
+    }
+
+    public void rilascio() {
+        int i;
+        P(mutex);
+        <rilascio della risorsa>;
+        if(<esiste almeno un processo sospeso per il quale la condizione risulta true>) {
+            <scelta fra i processi sospesi quello destinato alla riattivazione (Pi)>;
+            <allocazione della risorsa a Pi>;
+            <registrare che Pi non e piu sospeso>;
+            V(priv[i]);
+        }
+        V(mutex);
+    }
+}
+\end{lstlisting}
+
+\vspace{3mm}
+Proprietà del primo schema:
+\begin{itemize}
+    \item la sospensione del processo, nel caso in cui la condizione di sincronizzazione non sia soddisfatta, non può avvenire entro la sezione critica in quanto 
+    ciò impedirebbe ad un processo che rilascia la risorsa di accedere a sua volta alla sezione critica e di riattivare il processo sospeso. E quindi la sospensione
+    avviene fuori dalla sezione critica.
+    \item la specifica del particolare algoritmo di assegnazione della risorsa non è opportuno che sia realizzata nella primitiva V.
+    \item questo schema può presentare i seguanti problemi:
+    \begin{itemize}
+        \item l'operazione P sul semaforo privato viene sempre eseguita anche quando il processo richiedente non deve essere bloccato
+        \item il codice relativo all'assegnazione della risorsa viene duplicato nelle procedure acquisizione e rilascio
+    \end{itemize}
+\end{itemize}
+
+\vspace{3mm}
+Allocazione di risorse, \textbf{secondo schema} (supera i limiti del primo):
+
+\begin{lstlisting}
+class tipo_gestore_risorsa {
+    <struttura dati del gestore>;
+    semaphore mutex = 1;
+    semaphore priv[n] = {0, 0, ..., 0};
+
+    public void acquisizione(int i) {
+        P(mutex);
+        if(! <condizione di sincronizzazione>) {
+            <registrare la sospensione del processo>;
+            V(mutex);
+            P(priv[i]);
+            <resitrare che il processo non e piu sospeso>;
+        }
+        <allocazione della risorsa>;
+        V(mutex);
+    }
+
+    public void rilascio() {
+        int i;
+        P(mutex);
+        <rilascio della risorsa>;
+        if(<esiste almeno un processo sospeso per il quale la condizione risulta true>) {
+            <scelta del processo Pi da riattivare>;
+            V(priv[i]);
+        } else {
+            V(mutex);
+        }
+    }
+}
+\end{lstlisting}
+
+\vspace{3mm}
+Rispetto al primo schema, in questa soluzione risulta più complesso realizzare la riattivazione di più processi per i quali risulti vera contemporaneamente la
+condizione di sincronizzazione. Infatti il processo che rilascia la risorsa attiva al più un processo sospeso, il quale dovrà a sua volta provvedere alla riattivazione
+di eventuali altri processi.
+
+
+
+
+
+
+
 
 \end{document}
