@@ -38,6 +38,7 @@ postbreak = \raisebox{0ex}[0ex][0ex]{\ensuremath{\hookrightarrow}}
 
 \maketitle
 \tableofcontents
+\cleardoublepage
 
 \section{Virtualizzazione}
 
@@ -272,98 +273,272 @@ Principi di realizzazione:
     massima indipendenza tra le due componenti.
 \end{itemize}
 
-#### Dominio di protezione
+\subsection{Dominio di protezione}
 Un dominio definisce un insiem edi coppie, ognuna contenente l'identificatore di un oggetto e l'insieme delle operazioni che il soggetto associato al
 dominio può eseguire su ciascun oggetto
 
-$$ D(S) = {<o, diritti> | o è un oggetto, diritti è un insieme di operazioni} $$
+\vspace{3mm}
+$D(S)$ = $\{$$<$o, diritti$>$ $|$ o è un oggetto, diritti è un insieme di operazioni$\}$
+\vspace{3mm}
 
+\textbf{Modello di Grahmm-Denning}
 
-#### Modello di Grahmm-Denning
 Questo modello forsnisce una serie di comandi che garantiscono la modifica controllata dello stato di protezione:
-- create object
-- delete object
-- create subject
-- delete subject
-- read access right
-- grant access right
-- delete access right
-- tranfer access right
+\begin{itemize}
+    \item create object
+    \item delete object
+    \item create subject
+    \item delete subject
+    \item read access right
+    \item grant access right
+    \item delete access right
+    \item tranfer access right
+\end{itemize}
 
-##### Diritti
-**Diritto Owner**:
+\vspace{3mm}
+\subsubsection{Diritti}
+
+\textbf{Diritto Owner}:
+\vspace{3mm}
+
 Il diritto owner permette l'assegnazioen di qualunque diritto di accesso su un oggetto X ad un qualunque soggetto Sj da parte di un soggetto Si. L'operazione è consentita solo
 se il diritto owner appartiene a A[Si, X]
 
-**Diritto Control**:
+\vspace{3mm}
+\textbf{Diritto Control}:
+\vspace{3mm}
+
 Eliminazione di un diritto di accesso per un oggetto X nel dominio di Sj da parte di Si. L'operazione è consentita solo se il diritto control appartiene a A[Si, Sj], oppure owner
 appartiene a A[Si, X].
 
-**Cambio di dominio: switch**
+\vspace{3mm}
+\textbf{Cambio di dominio: switch}
+\vspace{3mm}
+
 Il cambio di dominio permette che un processo che esegue nel dominio del soggetto si può commutare al dominio di un altro soggetto Sj.
 L'operazione è consentita solo se il diritto switch appartiene a A[Si, Sj].
 
-#### Realizzazione della matrice delgi accessi
+\subsection{Realizzazione della matrice delgi accessi}
 La matrice degli accessi è una notazione astratta che rappresenta lo stato di protezione. Nella rappresentazione concreta è necessario considerare: la dimensione della matrice e matrice 
 sparsa.
 
 La rappresentazione concreta della matrice degli accessi deve essere ottimizzata sia riguardo all'occupazione di memoria sia rispetto all'efficienza nell'accesso e nella gestione della
 informazioni di protezione.
 Ci sono principalmente di approcci:
-- **Access Control List (ACL)**: rappresentazione per colonne, per ogni oggetto è associata una lista che contiene tutti i soggetti che possono accedere all'oggetto, con i relativi diritti
+\begin{itemize}
+    \item \textbf{Access Control List (ACL)}: rappresentazione per colonne, per ogni oggetto è associata una lista che contiene tutti i soggetti che possono accedere all'oggetto, con i relativi diritti
     d'accesso per l'oggetto
-- **Capability List**: rappresentazione per righe, ad ognin soggetto è associata una lista che contiene gli oggetti accessibili dal soggetto ed i relativi diritti d'accesso.
+    \item \textbf{Capability List}: rappresentazione per righe, ad ognin soggetto è associata una lista che contiene gli oggetti accessibili dal soggetto ed i relativi diritti d'accesso.
+\end{itemize}
 
-##### Access Control List
-La lista degli accessi per ogni oggetto è rappresentata dall'insieme delle coppie: **<soggetto, insieme dei diritti>**
+\subsubsection{Access Control List}
+La lista degli accessi per ogni oggetto è rappresentata dall'insieme delle coppie: \textbf{$<$soggetto, insieme dei diritti$>$}
 limitatamente ai soggetti con un insieme non vuoto di diritti per l'oggetto.
-Quando deve essere eseguita un'operazione M su un oggetto Oj, da parte di Si, si cerca nella lista degli accessi **<Si, Rk>, con M appartenente a Rk**
+
+Quando deve essere eseguita un'operazione M su un oggetto Oj, da parte di Si, si cerca nella lista degli accessi \textbf{$<$Si, Rk$>$, con M appartenente a Rk}.
+
 La ricerca può essere fatta preventivamente in una lista di default contenete i diritti di accesso applicabili a tutti gli oggetti. 
 Se in entrambi i casi la risposta è negativa, l'accesso è negato.
 
-**Utenti e Gruppi**
-Generalmente ogni soggetto rappresenta un singolo utente. Molti sistemi hanno il concetto di **gruppo di utenti**. I gruppi hanno un nome e possono essere inclusi nella ACL.
+\vspace{3mm}
+\textbf{Utenti e Gruppi}
+\vspace{3mm}
+
+Generalmente ogni soggetto rappresenta un singolo utente. Molti sistemi hanno il concetto di \textbf{gruppo di utenti}. I gruppi hanno un nome e possono essere inclusi nella ACL.
+
 In questo caso l'entry in ACL ha la forma:
-**UID_1, GID_1 : <insieme di diritti>**
-**UID_2, GID_2 : <insieme di diritti>**
+\textbf{UID-1, GID-1 : $<$insieme di diritti$>$}
+
+\textbf{UID-2, GID-2 : $<$insieme di diritti$>$}
+
 Dove UID è lo user identifier e GID è il group identifier.
 
+\vspace{3mm}
 In certi casi il gruppo identifica un ruolo: uno stesso utente può appartenere a gruppi diversi e quindi  con diritti diversi. In questo caso, quando un utente accede, specifica il
 gruppo di appartenenza.
 
-##### Capability List
+\subsubsection{Capability List}
 La lista delle capability, per ogni soggetto, è la lista di elementi ognuno dei quali:
-- è associato a un oggetto a cui il soggetto può accedere
-- contiene i diritti di accessi consentiti su tale oggetto
+\begin{itemize}
+    \item è associato a un oggetto a cui il soggetto può accedere
+    \item contiene i diritti di accessi consentiti su tale oggetto
+\end{itemize}
 
-Ogni elemento della lista prende il nome di **capability**. Il quale di compone di un identificatore (o un indirizzo) che indica l'oggetto e la rappresentazione dei vari diritti d'accesso.
+\vspace{3mm}
+Ogni elemento della lista prende il nome di \textbf{capability}. Il quale di compone di un identificatore (o un indirizzo) che indica l'oggetto e la rappresentazione dei vari diritti d'accesso.
 Quando S intende eseguire un'operazione M su un oggetto Oj: il meccanismo di protezione controlla se nella lisra delle capability associata a S ne esiste una relativa ad Oj che abbia
 tra i suoi diritti M.
 
+\vspace{3mm}
 Ovviamente le Capability List devono essere protette da manomissioni, ed è possibile in diversi modi:
-- la capability list viene gestita solamente da s.o.; l'utente fa riferimento ad un puntatore (capability) che identifica la sua posizione nella lista appartenete allo spazio del kerner
-- Architettura etichettata: a livello HW, ogni singola parola ha bit extra, che esprimono la protezione su quella cella di memoria. Ad esempio, se è una capability, deve essere
-protetta da scritture non autorizzate.
+\begin{itemize}
+    \item la capability list viene gestita solamente da s.o.; l'utente fa riferimento ad un puntatore (capability) che identifica la sua posizione nella lista appartenete allo spazio del kerner
+    \item Architettura etichettata: a livello HW, ogni singola parola ha bit extra, che esprimono la protezione su quella cella di memoria. Ad esempio, se è una capability, deve essere
+    protetta da scritture non autorizzate.
+\end{itemize}
+
+\vspace{3mm}
 I bit tag non sono utilizzari dall'aritmetica, dai confronti e da altre istruzioni normali e può essere modificato solo da programmi che agiscono in modo kernel.
 
-##### Revoca dei diritti di accesso
-In un sistema di protezione dinamica può essere necessario revocare i diritti d'accesso per un oggetto. La revoca può essere di tre tipi:
-- **generale o selettiva**: cioè valere per tutti gli utenti che hanno quel diritto di accesso o solo per un gruppo
-- **parziale o totale**: cipè riguardare un sottoinsieme di diritti per l'oggetto, o tutti
-- **temporanea o permanente**: cioè il diritto di accesso non sarà più disponibile, oppure potrà essere successivamente riottenuto
+\vspace{3mm}
+\subsubsection{Revoca dei diritti di accesso}
 
-**Revoca del diritto per un oggetto con ACL**:
+In un sistema di protezione dinamica può essere necessario revocare i diritti d'accesso per un oggetto. La revoca può essere di tre tipi:
+\begin{itemize}
+    \item \textbf{generale o selettiva}: cioè valere per tutti gli utenti che hanno quel diritto di accesso o solo per un gruppo
+    \item \textbf{parziale o totale}: cipè riguardare un sottoinsieme di diritti per l'oggetto, o tutti
+    \item \textbf{temporanea o permanente}: cioè il diritto di accesso non sarà più disponibile, oppure potrà essere successivamente riottenuto
+\end{itemize}
+
+\vspace{3mm}
+\textbf{Revoca del diritto per un oggetto con ACL}:
+
 Si fa riferimento alla ACL associata all'oggetto e si cancellano i diritti di accesso che si vogliono revocare
 
-**Revoca del diritto per un oggetto con Capability List**:
+\vspace{3mm}
+\textbf{Revoca del diritto per un oggetto con Capability List}:
+
 Più complicato rispetto ad ACL. È necessario verificare per ogni dominio se contiene la capability con riferimento all'oggetto considerato.
 
+\subsection{Protezione e Sicurezza}
 
-..
-..
-..
-..
+La protezione riguarda solamente il controllo degli accessi alle risorse interne al sistema. Invece la sicurezza si occupa di controllare gli accessi al sistema stesso.
 
+In alcuni casi la sola protezione può non essere efficace, nel caso in cui, ad esempio, un utente autorizzato riesce a far eseguire programmi che agiscono sulle
+risorse del sistema.
+
+\subsubsection{Sicurezza Multilivello}
+
+La maggior parte dei sistemi operativi permette ai singoli utenti di determinare chi possa leggere e scrivere i loro file ed oggetti. Invece in acluni ambienti
+è richiesto e necessario un più stretto controllo sulle regole di accesso alle risorse (ambiente militare, ospedaliero, ecc). Vengono quindi stabilite delle regole
+\textbf{generali} su "chi può accedere e a che cosa", che possono essere modificate solo da un'entità centrale autorizzata.
+
+Quando è necessario un controllo obbligatorio degli accessi al sistema, l'organizzazione a cui il sistema appartiene definisce le politiche \textbf{MAC} che
+stabiliscono le \textbf{regole generali} tramite l'adozione di un modello di sicurezza.
+
+\vspace{3mm}
+I modelli di sicurezza più utilizzati sono:
+\begin{itemize}
+    \item modello \textbf{Bell-La Padula}
+    \item modello \textbf{Biba}
+\end{itemize}
+
+Entrambi sono modelli multilivello.
+
+\vspace{3mm}
+In un modello di sicurezza multilivello i \textbf{soggetti} (utenti) e gli \textbf{oggetti} (risorse, file, ecc) sono \textbf{classificati} in \textbf{livelli} (classi
+di accesso):
+\begin{itemize}
+    \item Livelli per i soggetti (\textbf{clearance levels})
+    \item Livelli per gli oggetti (\textbf{sensivity levels})
+\end{itemize}
+
+\vspace{3mm}
+Il modello inoltre fissa le \textbf{regole di sicurezza}, le quali controllano il flusso delle informazioni tra i livelli.
+
+\vspace{3mm}
+\textbf{Modello Bell-La Padula}
+\vspace{3mm}
+
+Modello progettato per realizzare la sicurezza in organizzazioni militari, garantendo la \textbf{confidenzialità} delle informazioni.
+
+Associa a un sistema di protezione (matrice degli accesso) due regole di sicurezza MAC, che stabiliscono la direzione di propagazione delle informazioni nel sistema.
+
+\vspace{3mm}
+Quattro livelli di sensibilità degli oggetti:
+\begin{itemize}
+    \item Non classificato
+    \item Confidenziale
+    \item Segreto
+    \item Top secret
+\end{itemize}
+
+\vspace{3mm}
+Quattro livelli di autorizzazione (clearance) per i soggetti:
+
+Le persone sono assegnate ai livelli a seconda del ruolo nell'organizzazione.
+
+\vspace{3mm}
+\textbf{Regole di Sicurezza}:
+\begin{itemize}
+    \item \textbf{Proprietà di semplice sicurezza}: un processo in esecuzione al livello di sicurezza k può leggere solo oggetti al suo livello o a livelli inferiori
+    \item \textbf{Proprietà *}: un processo in esecuzione al livello di sicurezza k può scrivere solamente oggetti al suo livello o a quelli superiori
+\end{itemize}
+
+Quindi i processi possono leggere verso il basso e scrivere verso l'alto, ma non il contrario. (flusso delle informazioni dal basso verso l'alto).
+
+\vspace{3mm}
+Generalmente a queste regole si aggiungono le regole di protezioen speficicate dalla matrice degli accessi.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.70\columnwidth]{imgs/bell-padula.PNG}
+\end{figure}
+
+\vspace{3mm}
+Il modello Bell-La Padula è stato concepito per mantenere i segreti, non per garantire l'integrità dei dati. E\' possibile infatti sovrascrivere l'informazione
+appartenente ad un livello superiore.
+
+\vspace{3mm}
+Esempio cavallo di troia
+
+\vspace{3mm}
+\textbf{Modello Biba}
+\vspace{3mm}
+
+Se il modello Bell-La Padula è stato concepito per mantenere i segreti e non per garantire l'integrità dei dati, il Modello Biba ha come obiettivo principale proprio
+l'integrità dei dati.
+
+\vspace{3mm}
+\begin{itemize}
+    \item \textbf{Proprietà di semplice sicurezza:} un processo in esecuzione al livello di sicurezza k può scrivere solamente oggetti al suo livello o a quelli
+    inferiori (nessuna scrittua verso l'alto)
+    \item \textbf{Proprietò di integrità *}: un processo in esecuzione al livello k può leggere solo oggetti al suo livello o quelli superiori (nessuna lettura
+    verso il basso)
+\end{itemize}
+
+Ovviamente il modello Biba è in conflitto con il modello B-LP e quindi non possono essere utilizzati contemporaneamente.
+
+\subsubsection{Architettura dei sistemi ad elevata sicurezza}
+
+\textbf{Sistemi operativi sicuri, o fidati}: sistemi per i quali è possibile definire formalmente dei requisiti di sicurezza.
+
+\vspace{3mm}
+\textbf{Reference Monitor}: è un elemento di controllo realizzato dall'hardware e dal S.O. che regola l'accesso dei soggetti agli oggetti sulla base di paramentri
+di sicurezza (es. modello Bell-La Padula)
+
+\vspace{3mm}
+\textbf{Trusted computing base}: il RM ha accesso ad una base di calcolo fidata (Trusted computing base, o TBC) che contiene:
+\begin{itemize}
+    \item Privilegi dei sicurezza (autorizzazioni di sicurezza) di ogni soggetto
+    \item Attributi (classificazione rispetto alla sicurezza) di ciascun oggetto
+\end{itemize}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.70\columnwidth]{imgs/elevata_sicurezza.PNG}
+\end{figure}
+
+\vspace{3mm}
+\textbf{Sistemi fidati}
+\vspace{3mm}
+
+Il RM impone le regole di sicurezza (B-LP: no read-up, no write-down) ed ha le seguenti proprietà:
+\begin{itemize}
+    \item \textbf{Mediazione completa}: le regole di sicurezza vengono applicate ad ogni accesso e non solo, ad esempio, quando viene aperto un file
+    \item \textbf{Isolamento}: il monitor dei riferimenti e la base di dati sono protetti rispetto a modifiche non autorizzate (es. kernel)
+    \item \textbf{Verificabilità}: la correttezza del RM deve essere provata, cioè deve essere possibile dimostrare formalmente che il monitor impone le regole
+    di sicurezza e fornisce mediazione completa ed isolamento
+\end{itemize}
+
+\vspace{3mm}
+Il requisito di \textbf{mediazione completa} rende preferibile, per motivi di efficienza, che la soluzione debba essere almeno parziamente hardware.
+
+\vspace{3mm}
+Il requisito di \textbf{isolamento} impone che non sia possibile oer chi porta l'attacco, modificare la logica del RM o il contenuto del DB centrale della sicurezza.
+
+\vspace{3mm}
+Il requisito della \textbf{verificabilità} è difficile da soddisfare per un sistema general-purpose.
 
 \section{Programmazione Concorrente}
 
@@ -934,7 +1109,7 @@ class tipo_gestore {
 Leggere esempi sulle condizioni di sincronizzazione.
 
 \vspace{5mm}
-\textbf{Semaforo condizione}
+\textbf{Semaforo privato}
 
 \vspace{3mm}
 Un semaforo S si deive privato per un processo quando solo tale processo può eseguire la primitiva P sul semaforo S. La primitiva V sul semaforo può essere invece eseguita
@@ -1037,6 +1212,78 @@ Rispetto al primo schema, in questa soluzione risulta più complesso realizzare 
 condizione di sincronizzazione. Infatti il processo che rilascia la risorsa attiva al più un processo sospeso, il quale dovrà a sua volta provvedere alla riattivazione
 di eventuali altri processi.
 
+\section{Realizzazione del nucleo}
+
+Si chiama \textbf{nucleo} (o kernel) il modulo (o insieme di funzioni) realizzato in software, hardware o firmware che supporta il concetto di processo e realizza
+gli strumenti necessari per la gestione dei processi.
+
+\vspace{3mm}
+Il nucleo costituisce il livello più interno di un qualunque sistema basato su processi, ad esempio:
+\begin{itemize}
+    \item il livello più elementare di un sistema operativo multiprogrammato
+    \item il supporto a tempo di esecuzione di un linguaggio per la programmazione concorrente
+\end{itemize}
+
+Il nucleo è il solo modulo che è consio dell'esistenza delle interruzioni. I processi che colloquiano con i dispositivi utilizzano opportune primitive del
+nucleo che provvedono a sospenderli in attesa del completamento dell'azione richiesta. Non appena l'azione viene completata, il relativo segnale di interruzione
+iviato dal dispositivo alla CPU viene catturato dal nucleo che provvede a risvegliare il processo sospeso.
+
+La gestione delle interruzioni è quindi invisibile ai processi ed ha come unico effetto rilevabile di rallentare la loro esecuzione sulle rispettive macchine virtuali.
+
+\subsection{Caratteristiche fondamentali del nucleo}
+
+\textbf{Efficienza}: condiziona l'intera struttura a processi. Infatti esistono dei sistemi in cui alcune o tutte le operazioni del nucleo sono realizzate in hardware
+o attraverso microprogrammi.
+
+\vspace{3mm}
+\textbf{Dimensioni}: la semplicità delle funzioni richieste al nucleo fa si che la sua dimensinoe risulti estremamente limitata.
+
+\vspace{3mm}
+\textbf{Separazioen tra meccanismi e politiche}: il nucleo deve contenere solo meccanismi consentendo così, a livello di processi, di utilizzare tali meccanismi per la 
+realizzazione di diverse politiche di gestione a seconda del tipo di applicazione.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.70\columnwidth]{imgs/processo.PNG}
+\end{figure}
+
+Le transizioni tra i due stati sono implementate dai meccanismi di sincronizzazione realizzati dal nucleo. \textbf{P} per sospensione e \textbf{V} per risveglio.
+
+\vspace{3mm}
+Stati di un processo in un sistema in cui il numero di processi supera il numero delle unità di elaborazione:
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.70\columnwidth]{imgs/processi.PNG}
+\end{figure}
+
+Quando un processo perde il controllo del processore, il contenuto dei registri del processo viene salvato in un'area di memoria associata al processo, chiamata descrittore.
+
+Ciò consente una maggiore flessibilità nella politica di assegnazione del processore ai processi, rispetto alla soluzione di salvare le informazioni nello stack.
+
+\vspace{3mm}
+Quindi la funzione fondamentale del nucleo di un sistema a processi è la gestione delle transizioni di stato dei processi. I principali compiti del nucleo sono:
+\begin{itemize}
+    \item \textbf{Gestire il salvataggio e il ripristino dei contesti dei processi}: quando un processo abbandona il controllo dell'unità di elaborazione fisica,
+        tutte le informazioni contenute nei registri di tale unità devono essere trasferite nel descrittore. Allo stesso modo, quando un processo riprende l'esecuzione
+        tutte le informazioni contenute nel suo descrittore devono essere trasferite nei registri di macchina
+    \item \textbf{Scegliere a quale tra i processi pronti assegnare l'unità di elaborazione (scheduling della CPU)}: quando un processo abbandona il controllo
+        dell'unità di elaborazione, il nucleo deve scegliere tra tutti i processi pronti quello da mettere in esecuzione. La scelta può essere o di tipo FIFO, oppure
+        può utilizzare la priorità dei processi.
+    \item \textbf{Gestire le interruzioni dei dispositivi esterni}: traducendole in attivazione di processi da bloccato a pronto.
+    \item \textbf{Realizzare i meccanismi di sincronizzazione dei processi}: gestendo il passaggio dei processi dallo stato di esecuzioen allo stato di bloccato e da
+        bloccato a pronto.
+\end{itemize}
+
+\subsection{Realizzazione del Nucleo: Architettura monoprocessore}
+
+\subsubsection{Strutture Dati del Nucleo}
+
+
+
+
+
+
+\section{Modello a scambio di messaggi}
 
 
 
