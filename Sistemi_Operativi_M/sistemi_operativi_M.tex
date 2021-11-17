@@ -1278,6 +1278,40 @@ Quindi la funzione fondamentale del nucleo di un sistema a processi è la gestio
 
 \subsubsection{Strutture Dati del Nucleo}
 
+Il \textbf{Descrittore del processo} è la principale struttura dati del nucleo, e contiene le seguenti informazioni:
+\begin{itemize}
+    \item \textbf{Identificatore del processo}: nome che identifica univocamente il processo durante il suo tempo di vita
+    \item \textbf{Stato del processo}
+    \item \textbf{Modalità di Servizio}: contiene parametri di scheduling
+    \begin{itemize}
+        \item FIFO
+        \item Priorità (fissa o variabile)
+        \item Deadline (tempo massimo entro il quale la richiesta può essere soddisfatta)
+        \item Quanto di temo (sistemi time sharing)
+    \end{itemize}
+    \item \textbf{Contesto del processo}: program counter, registro di stato, registri generali, indirizzo dell'area di memoria privata del processo.
+    \item \textbf{Code di processo}: a seconda del loro stato i processi vengono inseriti in apposite code. Ogni descrittore contiene l'identificatore del processo successivo 
+    nella stessa coda.
+\end{itemize}
+
+\begin{lstlisting}[caption={Realizzazione desctittore del processo},captionpos=b]
+typedef struct {
+    int indice_priorità;
+    int delta_t;
+} modalità_di_servizio;
+
+typedef struct {
+    int nome;
+    modalità_di_servizio servizio;
+    tipo_contesto contesto;
+    tipo_stato stato;   // running, ready, waiting, ecc.
+    int successivo;
+} descrittore_processo;
+
+descrittore_processo descrittori[num_max_proc];
+\end{lstlisting}
+
+\subsubsection{Coda dei processi pronti}
 
 
 

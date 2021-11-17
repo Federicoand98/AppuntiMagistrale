@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "antlr4ts": "^0.5.0-alpha.4"
+  }
+}
