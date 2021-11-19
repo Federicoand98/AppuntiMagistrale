@@ -1313,9 +1313,155 @@ descrittore_processo descrittori[num_max_proc];
 
 \subsubsection{Coda dei processi pronti}
 
+Esistono sempre una o più \textbf{code di processi pronti}. Non appena un processo viene riattivato tramite una \textbf{v} viene
+inserito in fondo alla coda corrispondente alla sua priorità.
 
+La coda dei processi pronti contiene sempre almeno un \textbf{dummy process} il quale viene messo in esecuzione solamente quando tutte
+le altre code sono vuote e rimane in esecuzione fino a quando qualche altro processo diventa pronto. Inoltre il dummy process ha
+la priorità più bassa ed è sempre nello stato di pronto.
 
+\vspace{3mm}
+\begin{lstlisting}[caption={Esempio di realizzazione coda dei processi pronti}]
+typedef struct {
+    int primo;
+    int ultimo;
+} descrittore_coda;
 
+typedef descrittore_coda coda_a_livelli[Npriorita];
+
+coda_a_livelli coda_processi_pronti;
+
+// Inserimento => inserisce il processo di indice P nella coda C
+void Inserimento(int P, descrittore_coda C) {
+
+}
+
+// Prelievo => estrae il primo processo dalla coda C e ristituisce il suo indice
+int Prelievo(descrittore_coda C) {
+
+}
+\end{lstlisting}
+
+\textbf{Coda dei descrittori liberi}:
+
+Coda nella quale sono concatenati i descrittori disponibili per la creazione di nuovi processi
+e nella quale sono reinseriti i descrittori dei processi terminati
+
+\vspace{3mm}
+\textbf{Processo in esecuzione}:
+
+Il nucleo necessita di conoscere quale processo è in esecuzione. Questa informazione, rappresentata dall'indice del descrittore
+del processo, viene contenuta in una particolare variabile del nucleo. Quando il nucleo viene inizializzato, viene creato un processo
+e l'indice del processo viene assegnato a \textbf{processo_in_esecuzione}.
+
+\subsection{Funzioni del Nucleo}
+
+Le funzioni del nucleo realizzano le operazioni di \textbf{transizione di stato} per i singoli processi. Ogni transizione prevede il
+prelievo da una coda del descrittore del processo coinvolto ed il suo inserimento in un'altra coda.
+
+A tale scopo vengono utilizzate due procedure: \textbf{Inserimento} e \textbf{Prelievo} di un descrittore da una coda. Se la coda è vuota
+si adotta l'ipotesi che il campo primo assuma il valore -1.
+
+\vspace{3mm}
+Le funzioni del nucleo vengono suddivise in due livelli:
+\begin{itemize}
+    \item \textbf{Livello Superiore}: il quale contiene tutte le funzioni direttamente utilizzabili dai processi sia esterni che interni,
+    quali risposta ai segnali di interruzione e primitive per la creazione, eliminazione e sincronizzazione dei processi.
+    \item \textbf{Livello Inferiore}: il quale realizza tutte le funzionalità di cambio di contesto, ad esmepio salvataggio del contesto
+    del processo che si sospende nel suo descrittore, scelta di un nuovo processo da mettere in esecuzione tra quelli pronti e 
+    ripristino del suo contesto.
+\end{itemize}
+
+\vspace{3mm}
+L'ambiente di esecuzione delle funzioni del nucleo ha caratteristiche distinte dal quello dei processi. Infatti, per motivi di protezione,
+le funzioni del nucleo sono le uniche che:
+\begin{itemize}
+    \item possono operare sulle strutture dati che rappresentano lo stato del sistema (descrittori, code di descrittori, semafori, ecc..)
+    \item possono utilizzare istruzioni privilegiate (abilitazione e disabilitazione delle interruzioni, ecc)
+\end{itemize}
+
+Le funzioni del nucleo devono essere eseguite in modo mutuamente esclusivo. Inoltre i due ambienti di esecuzioen (nucleo e processi
+utente) corrispondono a stati diversi di operazione dell'elaboratore (kernel e user). E il meccanismo di passaggio da uno all'altro
+è basato sul meccanismo delle interruzioni.
+
+In particolare:
+\begin{itemize}
+    \item Nel caso di funzioni chiamate da \textbf{processi esterni}, il passaggio all'ambiente del nucleo è ottenuto tramite il meccanismo di
+    risposta al segnale di \textbf{interruzione}
+    \item Nel caso di funzioni chiamate da \textbf{processi interni}, il passaggio è ottenuto tramite l'esecuzione di \textbf{system calls}
+    \item In entrambi i casi, al completamento della funzione richiesta, il trasferimento all'ambiente user avviene tramite il
+    meccanismo di \textbf{ritorno da interruzione (RTI)}
+\end{itemize}
+
+\subsubsection{Funzione di livello inferiore: Cambio di Contesto}
+
+La funzione di cambio di contesto è costituita da 3 principali fasi:
+
+\vspace{3mm}
+\textbf{Salvataggio dello stato}:
+
+Salvataggio del contesto del processo in esecuzione nel suo descrittore e inserimento del descrittore nella coda dei processi bloccati
+o dei processi pronti.
+
+\begin{lstlisting}
+void Salvataggio_stato() {
+    int j;
+    j = processo_in_esecuzione;
+    descrittori[j].contesto = <valori dei registri CPU>;
+}
+\end{lstlisting}
+
+\vspace{3mm}
+\textbf{Assegnazione della CPU}
+
+Rimozione del processo a maggiore priorità dalla coda dei pronti e caricamento dell'identificatori di tale processo nel registro
+processo in esecuzione.
+
+\begin{lstlisting}
+// scheduling: algoritmo con priorità
+void Assegnazione_CPU() {
+    int k = 0, j;
+    while(coda_processi_pronti[k].primo == -1) {
+        k++;
+    }
+
+    j = Prelievo(coda_processi_pronti[k]);
+    processo_in_esecuzione = j;
+}
+\end{lstlisting}
+
+\vspace{3mm}
+\textbf{Ripristino dello stato}:
+
+Caricamento del processo del nuovo processo nei registri di macchina.
+
+\begin{lstlisting}
+void Ripristino_stato() {
+    int j;
+    j = processo_in_esecuzione;
+    <registro-temp> = descrittori[j].servizio.delta_t;
+    <registro-CPU> = descrittori[j].contesto;
+}
+\end{lstlisting}
+
+\vspace{3mm}
+\textbf{Gestione del temporizzatore}:
+
+Per consetire la modalità di servizio a divisione di tempo è necessario che il nucleo gestica un \textbf{dispositivo temporizzatore}
+tramite un'apposita procedura che ad intervalli di tempo fussati, provveda a sospendere il processo in esecuzione ed assegnare l'unità
+di elaborazione ad un altro processo.
+
+\begin{lstlisting}
+void Cambio_di_Contesto() {
+    int j, k;
+    Salvataggio_stato();
+    j = processo_in_esecuzione;
+    k = descrittori[j].servizio.priorità;
+    Inserimento(j, coda_processi_pronti[k]);
+    Assegnazione_CPU();
+    Ripristino_stato();
+}
+\end{lstlisting}
 
 \section{Modello a scambio di messaggi}
 
