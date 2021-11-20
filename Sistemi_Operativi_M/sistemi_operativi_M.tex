@@ -1463,6 +1463,128 @@ void Cambio_di_Contesto() {
 }
 \end{lstlisting}
 
+\subsection{Realizzazione Semaforo (caso monoprocessore)}
+
+Nel nucleo di un sistema monoprocessore il semaforo può essere implementato tramite:
+\begin{itemize}
+    \item una variabile intera che rappresenta il suo valore (>=0)
+    \item un puntatore ad una lista di descrittori di processi in attesa sul semaforo (bloccati)
+\end{itemize}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.60\columnwidth]{imgs/sem_kernel.png}
+\end{figure}
+
+\vspace{3mm}
+Se non sono presenti semafori in coda, il puntatore alla lista contiene la costante \textbf{nil}.
+
+La coda viene gestita con politica FIFO, e quindi i processi risultano ordinati secondo il loro tempo di arrivo nella coda associata
+al semaforo.
+
+Il descrittore di un processo viene inserito nella coda del semaforo come conseguenza di una primitiva p non passsante, e viene prelevato
+per effetto di una v.
+
+\vspace{3mm}
+\begin{lstlisting}
+// gestione dei processi basata su priorità => associamo al semaforo un insieme di code (una per priorità)
+
+typedef struct {
+    int contatore;
+    coda_a_livelli coda;
+} descr_semaforo;
+\end{lstlisting}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.60\columnwidth]{imgs/op_p_ker.png}
+\end{figure}
+
+\begin{lstlisting}
+// insieme di tutti i semafori
+descr_semaforo semafori[num_max_sem];
+
+//ogni semaforo è rappresentato dall'indice che lo individua nel vettore semafori
+typedef int semaforo;
+
+void P(semaforo s) {
+    int j, k;
+    if(semafori[s].contatore == 0) {
+        Salvataggio_stato();
+        j = processo_in_esecuzione;
+        k = descrittori[j].servizio.priorita;
+        Inserimento(j, semafori[s].coda[k]);
+        Assegnazione_CPU();
+        Ripristino_stato();
+    } else {
+        contatore--;
+    }
+}
+\end{lstlisting}
+
+\vspace{3mm}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.60\columnwidth]{imgs/op_v_ker.png}
+\end{figure}
+
+\begin{lstlisting}
+void V(semaforo s) {
+    int j, k, p, q; // j,k: processi; p,q: indici priorita
+    q = 0;
+
+    while(semafori[s].coda[q].primo == -1 && q < min_priorita) {
+        q++;
+    }
+
+    if(semafori[s].coda[q].primo != -1) {
+        k = Prelievo(semafori[s].coda[q]);
+        j = processo_in_esecuzione;
+        p = descrittori[j].servizio.priorita;
+        if(p < q) {
+            // il processo in esecuzione è prioritario
+            Inserimento(k, coda_processi_pronti[q]);
+        } else {
+            // preemption
+            Salvataggio_stato();
+            Inserimento(j, coda_processi_pronti[p]);
+            processo_in_esecuzione = k;
+            Ripristino_stato();
+        }
+    } else {
+        semafori[s].contatore++;
+    }
+}
+\end{lstlisting}
+
+\subsection{Passaggio da ambiente di nucleo all'ambiente processi e viceversa}
+
+Il passaggio da ambiente di nucleo all'ambiente di processi e viceversa è basato sul meccanismo di \textbf{interruzioni}
+(interne o asincrone, interne o sincrone). In entrambi i casi, al completamento della funzione richiesta, il passaggio
+avviene sfruttando il meccanismo di ritorno da interruzione.
+
+\vspace{3mm}
+Ad ogni processo è associata una pila (stack) gestita tramite il registro stack pointer. La pila rappresenta l'area di lavoro
+del processo e contiene variabili temporanee ed i record di attivazione delle procedure chiamate.
+
+\vspace{3mm}
+I registri presenti sono: PC e PS (resgistro di stato), R1,...,Rn, R'1,...,R'n, SP1, SP1' (registri generali e stack pointer)
+associati rispettivamente agli ambienti di nucleo e dei processi.
+
+\vspace{3mm}
+L'esecuzione di una primitiva da parte di P corrisponde all'esecuzione di una istruzione di tipo SVC:
+\begin{enumerate}
+    \item interruzione
+    \item Salvataggio di PC e PS relativi a P in cima alla pila del nucleo
+    \item Caricamento in PC e PS dell'indirizzo della procedura di risposta all'interruzione e di PS del nucleo
+    \item Esecuzione della procedura di risposta all'interruzione con chiamata alla primitiva di nucleo richiesta (es P)
+    \item P passante: esecuzzioen di ritorno dall'interruzione che ripristina in PC e PS i valori del processo contenuti nella pila del nucleo
+    \item P bloccante (non passante): salvataggio stato
+\end{enumerate}
+
+
+
 \section{Modello a scambio di messaggi}
 
 
