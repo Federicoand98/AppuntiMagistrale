@@ -1583,6 +1583,114 @@ L'esecuzione di una primitiva da parte di P corrisponde all'esecuzione di una is
     \item P bloccante (non passante): salvataggio stato
 \end{enumerate}
 
+\subsection{Architettura Multiprocessore: realizzazione del nucleo}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.60\columnwidth]{imgs/architettura.png}
+\end{figure}
+
+\vspace{3mm}
+\textbf{Sistemi operativi multiprocessore: organizzazione interna}
+\vspace{3mm}
+
+Un sistema operativo che esegue su un'architettura multiprocessore deve gestire una molteplicità di CPU, ugnuna delle quali può accedere alla stessa memoria
+condivisa.
+
+Esistono principalmente due modelli:
+\begin{itemize}
+    \item \textbf{Modello SMP}: unica copia del nucleo condivisa tra tutte le CPU
+    \item \textbf{Modello a nuclei distinti}: più istanze del nucleo concorrenti
+\end{itemize}
+
+\subsubsection{Modello SMP: Simmetric Multi Processing}
+
+In questo modello è presente un'unica copia del nucleo del sistema operativo allocata nella memoria comune che si occupa della gestione di tutte le risorse
+disponibili, comprese le CPU. Ogni processi può essere allocato su una qualunque CPU. Inoltre è possibile che processi che eseguono su CPU diverse
+richiedano contemporaneamente funzioni del nucleo ad esempio le System Call. E dato che ogni funzione del nucleo comporta un accesso alle strutture
+dati interne al nucleo, occore regolare gli accessi al nucleo in modo che avvengano in modo sincronizzato.
+
+\vspace{3mm}
+\textbf{Sincronizzazione nell'accesso al nucleo}:
+
+\vspace{3mm}
+\textbf{Soluzione ad un solo lock}:
+
+Viene associato al nucleo \textbf{un Lock L}, per garantire la mutua esclusione nell'esecuzione di funzioni del nucleo da parte di processi diversi: l'accesso
+esclusivo alle sue strutture dati può essere ottenuto delimitando il corpo di ogni richiesta per il nucleo con le primitive \textbf{lock} e \textbf{unlock}
+applicate all'\textbf{unico Lock l}.
+
+Il problema fondamentale di questa soluzione è la \textbf{limitazione del grado di parallelismo}, escludendo a priori ogni possibilità di esecuzione
+contemporanea di funzioni del nucleo che operano su strutture dai distinte.
+
+\vspace{3mm}
+\textbf{Soluzione a più lock}:
+
+Un maggiore parallelismo può essere ottenuto individuando all'interno del nucleo diverse classi di sezioni critiche, ognuna associata a una struttura dati
+separata e sufficientemente indipendente dalle altre. Ad ogni struttura dati viene associato un lock distinto.
+
+Ad esempio la coda dei processi pronti, i singoli semafori, ecc, vengono protetti tramite lock distinti.
+
+Ogni operazionie del nucleo che richiederà l'accesso a una particolare struttura $$S_i$$ protetta dal locl $$L_i$$, conterrà una sezione critica
+il cui prologo ed epilogo saranno rispettivamente $$lock(L_i)$$ e $$unlock(L_i)$$.
+
+\vspace{3mm}
+\textbf{Scheduling dei processi:}
+
+Il modello SMP consente la schedulazione di ogni processo su uno qualunque dei processori attraverso la \textbf{load balancing}, ovvero la possibilità di
+attuare politiche di distribuzione equa del carico sui processori.
+
+Tuttavia, in alcuni casi può risultare più conveniente assegnare un processo ad un determinato processore:
+\begin{itemize}
+    \item i processori possono accedere più rapidaemnte alla loro memoria privata piuttosto che a quella remota, quindi potrebbe convenire schedulare il processo
+    sul processore la cui memoria privata già contiene il suo codice.
+    \item in sistemi NUMA l'accesso alla memoria "più vicina" è più rapido: conviene schedulare il processo sul processore più vicino alla memoria ove
+    è allocato il suo spazio di indirizzamento
+    \item i processori hanno memoria cache. Il processo dovrebbe essere assegnato al processore sul quale era stato precedentemente eseguito.
+\end{itemize}
+
+\subsubsection{Modello a nuclei distinti}
+
+In questo modello la struttura interna del sistema operativo è articolata su più nucleo, ognuno dedicato alla gestione di una diversa CPU.
+
+L'assunzione di base è che l'insieme dei processi che eseguiranno nel sistema sua partizionabile in tanti sottoinsiemi (nodi virtuali) lascamente connessi, cioè con un ridotto numero di
+interazioni reciproche:
+\begin{itemize}
+    \item Ciascun nodo virtuale è associato ad un nodo fisico: esso è gestito da un nucleo distinto e pertanto tutte le strutture dati del nucleo relative al nodo virtuale vengono allocate
+    sulla memoria privata del nodo fisico
+    \item In questo modo tutte le interazioni locali al nodo virtuale possono avvenire indipendentemente e concorrentemente a quelle di altri nodi virtuali, facendo riferimento al nucleo del nodo.
+\end{itemize}
+
+\vspace{3mm}
+Solo le interazioni tra processi appartenenti a nodi virtuali diversi utilizzano la memoria comune.
+
+\subsubsection{Organizzazione SMP vs nuclei distinti}
+
+\begin{itemize}
+    \item \textbf{Grado di parallelismo tra CPU}: il modello a nuclei distinti è più vantaggioso, in quanto il grado di accoppiamento tra CPU è più basso. Maggiore scalabilità.
+    \item \textbf{Gestione ottimale delle risorse computazionali}: 
+    \begin{itemize}
+        \item il modello SMP fornisce i presupposti per un migliore bilanciamento del carico tra le CPU perchè lo scheduler può decidere di allocare ogni processo su qualunque CPU.
+        \item il secondo modello voncola ogni processo ad essere schedulato sempre sullo stesso nodo.
+    \end{itemize}
+\end{itemize}
+
+\vspace{5mm}
+\textbf{Realizzazione dei semafori nel modello SMP}
+
+Tutte le CPU condividono lo stesso nucleo: per sincronizzare gli accessi al nucleo, le struttura dati del nucleo vengono protette tramite lock.
+
+In particolare, i sinfoli semafori e la coda dei processi pronti vengono protetti tramite \textbf{lock distinti}.
+
+In questo caso due operazioni P su semafori diversi:
+\begin{itemize}
+    \item possono operare in modo \textbf{contemporaneo} se non risultano sospensive
+    \item in caso contrario, vengono \textbf{sequenzializzati} solo gli accessi alla coda dei processi pronti.
+\end{itemize}
+
+
+
+
 
 
 \section{Modello a scambio di messaggi}
