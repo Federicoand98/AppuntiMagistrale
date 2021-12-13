@@ -1695,9 +1695,132 @@ In questo caso due operazioni P su semafori diversi:
 
 \section{Modello a scambio di messaggi}
 
+Il modello architetturale di una macchina concorrente è caratterizzato da:
+\begin{itemize}
+    \item Ogni processo può accedere esclusivamente alle risorse allocate nella propria memoria locale.
+    \item Ogni risorsa del sistema è accessibile direttamente ad un \textbf{solo processo (il Gestore della risorsa)}
+    \item Se una risorsa è necessaria a più processi applicativi, ciascuno di questi (processi clienti) dovrà delegare l'unico processo che può operare sulla risorsa (processo server)
+        all'esecuzione delle operazioni richieste; al termine di ogni operazione il server restituirà al cliente gli eventuali risultati
+    \item In questo modello il concetto di \textbf{gestore} di una risorsa coincide con quello di processo server
+    \item Ogni processo, per usifruire dei servizi offerti da una risorsa, dovrà comunicare con il gestore
+    \item Il meccanismo di base utilizzato dai processi per qualunque tipo di interazione è costituito dal \textbf{meccanismo di scambio di messaggi}
+\end{itemize}
+
+\subsection{Canale di comunicazione}
+
+Il concetto fondamentale del modello a scambio di messaggi è il \textbf{canale}, ovvero un \textbf{collegamento logico mediante il quale due o più processi comunicano}.
+
+È il nucleo della macchina concorrente a realizzare l'astrazione "canale" come meccanismo primitivo per lo scambio di informazioni. Ed è compito del linguaggio di programmazione offrire
+gli strumenti linguistici di alto livello per:
+\begin{itemize}
+    \item speficare i canali di comunicazione
+    \item utilizzarli per esprimere le interazioni tra i processi
+\end{itemize}
+
+\vspace{5mm}
+\textbf{Caratteristiche del canale di comunicazione}
+\vspace{3mm}
+
+I parametri che caratterizzano il concetto di canale sono:
+\begin{itemize}
+    \item la \textbf{direzione del flusso dei dati} che un canale può trasferire
+    \item la \textbf{designazione del canale} e dei processi origine e destinatario di ogni comunicazione
+    \item il tipo di \textbf{sincronizzazione} fra i processi comunicanti
+\end{itemize}
+
+\subsection{Tipi di Canali}
+
+I canali possono essere distinti in più gruppi. Facendo riferimento alla \textbf{direzione del flusso dei dati}, possiamo distinguere due tipi di canali:
+\begin{itemize}
+    \item Canale \textbf{monodirezionale}: consente il flusso dei messaggi in una sola direzione (mittente verso ricevente)
+    \item Canale \textbf{bidirezionale}: può essere usato sia per inviare che per ricevere informazioni
+\end{itemize}
+
+\vspace{3mm}
+Facendo invece riferimento alla \textbf{designazione dei processi comunicanti}, è possibile definire tre tipi di canale:
+\begin{itemize}
+    \item \textbf{Link}: da uno-a-uno (canale simmetrico)
+    \item \textbf{Port}: da molti-a-uno (canale asimmetrico)
+    \item \textbf{Mailbox}: da molti-a-molti (canale asimmetrico)
+\end{itemize}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.50\columnwidth]{imgs/link.png}
+    \quad
+    \includegraphics[width=0.50\columnwidth]{imgs/port.png}
+\end{figure}
+
+\vspace{3mm}
+Con riferimento alla modalità di \textbf{sincronizzazione} tra i processi comunicanti, possiamo individuare tre tipi di canale:
+\begin{itemize}
+    \item Comunicazione \textbf{asincrona}
+    \item Comunicazione \textbf{sincrona}
+    \item Comunicazione con \textbf{sincronizzazione estesa}
+\end{itemize}
+
+\subsubsection{Comunicazione asincrona}
+
+\textbf{Semantica}:
+
+Il processo mittente \textbf{continua la sua esecuzione} immediatamente dopo l'invio del messaggio.
+
+\vspace{3mm}
+\textbf{Effetti}:
+
+\begin{itemize}
+    \item La ricezione del messaggio può avvenire in un istante successivo all'invio: il messaggio ricevuto contiene informazioni che non possono essere attribuite allo stato attuale del
+        mittente e quindi c'è una difficoltà nella verifica dei programmi.
+    \item L'invio di un messaggio non è un punto di sincronizzazione per mittente e destinatario.
+\end{itemize}
+
+\vspace{3mm}
+\textbf{Proprietà}:
+
+\begin{itemize}
+    \item \textbf{Carenza espressiva}
+    \item \textbf{L'assensa di vincoli di sincronizzazione} tra mittente e destinatario favorisce il \textbf{grado di concorrenza}
+    \item Da un punto di vista realizzativo, sarebbe necessario un \textbf{buffer di capacità illimitata}
+\end{itemize}
+
+\vspace{3mm}
+\textbf{Realizzazione}:
+
+Ogni implementazione prevede inevitabilmente un limite alla capacità del buffer. Nel caso di un buffer pieno, se si vuole mantenere immutata la semantica, occorre che il supporto
+a tempo di esecuzione provveda a sospendere il processo che invia il messaggio.
+
+\subsubsection{Comunicazione Sincrona: rendez-vous semplice}
+
+\textbf{Semantica}:
+
+Il primo dei due processi comunicanti che esegue l'invio (mittente) o la ricezione (destinatario) si sospende in attesa che l'altro sia pronto ad eseguire l'operazione corrispondente.
+
+\vspace{3mm}
+\textbf{Effetti}:
+
+L'invio di un messaggio è un \textbf{punto di sincronizzazione}: ogni messaggio rivcevuto contiene informazioni attribuibili allo stato attuale del processo mittente. Ciò semplifica la scrittura
+e la verifica dei programmi.
+
+\vspace{3mm}
+Inoltre \textbf{non è necessaria l'introduzione di un buffer}: un messaggio può essere inviato solamente se il ricevente è pronto a riceverlo.
+
+\vspace{5mm}
+\textbf{Comunicazione asincrona vs sincrona}
+\begin{itemize}
+    \item L'invio con semantica sincrona è più espressivo
+    \item La semantica asincrona consente di raggiungere maggiore concorrenza/parallelismo
+    \item La realizzazione del canale nella comunicazione asincrona richiede opportuna struttura per l'accodamento dei messaggi.
+\end{itemize}
+
+\vspace{5mm}
+\textbf{Comunicazione con sincronizzazione estesa: rendez-vous esteso}
+
+\textbf{Assunzione}: ogni messaggio inviato rappresenta una richiesta al destinatario dell'esecuzione di una certa azione
+
+\textbf{Semantica}: il processo mittente rimane in attesa fino a che il ricevente non ha terminato di svolgere l'azione richiesta
 
 
-
+\subsection{Costrutti linguistici e primitice per esprimere la comunicazione}
 
 
 
