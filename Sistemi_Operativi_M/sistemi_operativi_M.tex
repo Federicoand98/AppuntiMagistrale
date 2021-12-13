@@ -38,7 +38,8 @@ postbreak = \raisebox{0ex}[0ex][0ex]{\ensuremath{\hookrightarrow}}
 
 \maketitle
 \tableofcontents
-\cleardoublepage
+
+\newpage
 
 \section{Virtualizzazione}
 
@@ -200,6 +201,8 @@ Le prestazioni rispetto alla Fast Binary Translation sono notevolmente superiori
 
 (aggiungere protezione processore)
 
+
+\newpage
 
 \section{La protezione nei Sistemi Operativi}
 
@@ -540,8 +543,14 @@ Il requisito di \textbf{isolamento} impone che non sia possibile oer chi porta l
 \vspace{3mm}
 Il requisito della \textbf{verificabilità} è difficile da soddisfare per un sistema general-purpose.
 
+\newpage
+
 \section{Programmazione Concorrente}
 
+
+
+
+\newpage
 
 \section{Modello a memoria comune}
 
@@ -1212,6 +1221,8 @@ Rispetto al primo schema, in questa soluzione risulta più complesso realizzare 
 condizione di sincronizzazione. Infatti il processo che rilascia la risorsa attiva al più un processo sospeso, il quale dovrà a sua volta provvedere alla riattivazione
 di eventuali altri processi.
 
+\newpage
+
 \section{Realizzazione del nucleo}
 
 Si chiama \textbf{nucleo} (o kernel) il modulo (o insieme di funzioni) realizzato in software, hardware o firmware che supporta il concetto di processo e realizza
@@ -1689,8 +1700,7 @@ In questo caso due operazioni P su semafori diversi:
 \end{itemize}
 
 
-
-
+\newpackage
 
 
 \section{Modello a scambio di messaggi}
@@ -1821,6 +1831,68 @@ Inoltre \textbf{non è necessaria l'introduzione di un buffer}: un messaggio pu�
 
 
 \subsection{Costrutti linguistici e primitice per esprimere la comunicazione}
+\subsubsection{Definizione del canale (port)}
+
+Un canale \textbf{port} identifica un canale asimmetrico \textbf{molti-a-uni}
+
+port <tipo> <identificatore>;
+
+\begin{lstlisting}
+    port int ch1;
+\end{lstlisting}
+
+L'identificatore ch1 denota un canale utilizzato per trasferire messaggi di tipo intero. \textbf{Port} viene dichiarato locale ad un processo (il ricevente) ed è visibile ai
+processi mittenti mediante la dot notation -> <nome_processo>.<identificatore_canale>
+
+\subsubsection{Primitive di comunicazione}
+
+\textbf{Send}
+\vspace{3mm}
+
+\textbf{Send} è la primitica che esprime l'invio di un messaggio:
+\begin{center}
+    send(<valore>) to <porta>;
+\end{center}
+
+\begin{itemize}
+    \item \textbf{<porta>}: identifica in modo univoco il canale a cui inviare il messaggio;
+    \item \textbf{<valore>}: identifica una espressione dello stesso tipo di <porta> e rappresenta il contenuto del messaggio inviato.
+\end{itemize}
+
+\vspace{3mm}
+\textbf{Semantica}: può essere
+\begin{itemize}
+    \item \textbf{asincrona} -> canale bufferizzato;
+    \item \textbf{sincrona} -> canale a capacità nulla;
+\end{itemize}
+
+A seconda della semantica e delle caratteristiche del canale la send può sospendere o meno il processo che la esegue. Ad esempio:
+\begin{itemize}
+    \item \textbf{Send sincrona}: il processo attende che il destinatario esegua la primitica di ricezione (receive) corrispondente;
+    \item \textbf{Send asincrona}: il processo attende solo se il canale è pieno.
+\end{itemize}
+
+\vspace{5mm}
+\textbf{Receive}
+\vspace{3mm}
+
+\begin{center}
+    P = receive(<variabile>) from <porta>;
+\end{center}
+
+\begin{itemize}
+    \item \textbf{<porta>}: identifica il \textbf{canale}, locale al processo ricevente, dal quale ricevere il messaggio;
+    \item \textbf{<variabile>}: è l'identificativo della variabile, dello stesso tipo di <porta>, a cui assegnare il valore del messaggio ricevuto.
+\end{itemize}
+
+\vspace{3mm}
+\textbf{Semantica}:
+\begin{itemize}
+    \item \textbf{Default: Semantica Bloccante}. La primirica sospende il processo se non ci sono messaggi sul canale; quando c'è almeno un messaggio nel canale, ne estrae il primo
+        e ne assegna a <variabile> il valore. La receive restituisce un valore del tipo predefinito \textbf{process} che identifica il nome del processo mittente.
+    \item Alcuni linguaggi offrono anche una semantica non bloccante: se il canale è vuoto, il processo continua; se contiene almeno un messaggio, estrae il primo e lo assegna a
+        <variabile>.
+\end{itemize}
 
 
 
