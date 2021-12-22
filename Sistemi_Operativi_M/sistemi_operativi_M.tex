@@ -1844,7 +1844,7 @@ port <tipo> <identificatore>;
 L'identificatore ch1 denota un canale utilizzato per trasferire messaggi di tipo intero. \textbf{Port} viene dichiarato locale ad un processo (il ricevente) ed è visibile ai
 processi mittenti mediante la dot notation -> <nome_processo>.<identificatore_canale>
 
-\subsubsection{Primitive di comunicazione}
+\subsubsection{Primitive di comunicazione sincrone}
 
 \textbf{Send}
 \vspace{3mm}
@@ -1893,6 +1893,113 @@ A seconda della semantica e delle caratteristiche del canale la send può sospen
     \item Alcuni linguaggi offrono anche una semantica non bloccante: se il canale è vuoto, il processo continua; se contiene almeno un messaggio, estrae il primo e lo assegna a
         <variabile>.
 \end{itemize}
+
+\subsubsection{Receive Bloccante e Modello Client-Server}
+Il \textbf{Server} è un processo che si occupa di servire le richieste di altri processi, detti \textbf{Client}. Il server ha la possibilità di eseguire diversi servizi, ognuno attivato in seguito
+alla ricezione di un messaggio di tipo diverso. A questo scopo il server gestisce più \textbf{canali d'ingresso} (ad esempio porte), ognuno dedicato alla ricezione delle richieste di
+un particolare servizio.
+
+\vspace{3mm}
+Il problema principale della recieve bloccante su un modello client-server sta nel fatto che il server specifica il canale sul quale eseguire ogni receive. Se i canali sono più di uno, il server
+deve eseguire in sequenza le receie su ogni canale: poichè la receive ha semantica bloccante, c'è la possibilità di blocco su un canale mentre contemporaneamente ci sono messaggi in attesa di essere
+ricevuti su altri canali.
+
+\vspace{3mm}
+Una possibile soluzione potrebbe essere una \textbf{receive con semantica non bloccante}: verifica lo stato del canale, restituisce un messaggio (se presente) o un'indicazione del canale vuoto
+(non bloccante). Non sospende mai il processo che la esegue. Il server può eseguire un ciclo di ispezione/ricezione di/da tutti i canali.
+
+In caso di presenza contemporanea di messaggi su più canali la scelta può essere fatta secondo diversi criteri oppure in modo non deterministico.
+
+\textbf{Problema dell'attesa attiva}: se tutti i canali sono vuoti, il server continua a iterare.
+
+\vspace{3mm}
+\textbf{Meccanismo di ricezione ideale}:
+\begin{itemize}
+    \item consente al processo server di verificare contemporaneamente la disponibilità di messaggi su più canali;
+    \item abilità di ricezione di un messaggio da un qualunque canale contenente messaggi;
+    \item quando tutti i canali sono vuoti, blocca il processo in attesa che arrivi un messaggio, qualunque sia il canale su cui arriva.
+\end{itemize}
+
+Questo meccanismo è realizzabile tramite i \textbf{comandi con guardia}.
+
+\subsubsection{Comandi con Guardia}
+
+\begin{center}
+$<$\textbf{gaurdia}$>$ -$>$ $<$\textbf{istruzione}$>$
+\end{center}
+
+dove \textbf{guardia} è costituita dalla coppia: \textbf{(espressione booleana; receive)}
+\begin{itemize}
+    \item \textbf{espressione booleana} viene detta guardia logica;
+    \item \textbf{receive} con semantica bloccante e viene detta guardia d'ingresso;
+\end{itemize}
+
+\vspace{5mm}
+\textbf{Valutazione della guardia}
+
+\vspace{3mm}
+\begin{center}
+$<$guardia$>$ := ($<$espressione booleana$>$; $<$receive$>$)
+\end{center}
+
+La valutazione della guardia può fornire tre diversi valori:
+\begin{itemize}
+    \item \textbf{guardia fallita}: se l'espressione ha valore false e il comando eseguito con guardia fallisce;
+    \item \textbf{guardia ritardata}: se l'espressione booleana ha valore true e nel canale su cui viene eseguita non ci sono messaggi, il processo che esegue il comando viene sospenso
+        e quando arriverà il primo messaggio nel canale riferito dalla guardia d'ingressom il processo verrà riattivato, eseguirà la receive e successivamente l'istruzione;
+    \item \textbf{guardia valida}: se l'espressione booleana ha valore true e nel canale c'è almeno un messaggio, quindi il processo esegue la receive e successivamente l'istruzione.
+\end{itemize}
+
+\vspace{5mm}
+\textbf{Comando con guardia alternativo}
+
+\vspace{3mm}
+
+\begin{lstlisting}
+select {
+    [] <guardia_1> -> <istruzione_1>;
+    ...
+    [] <guardia_n> -> <istruzione_n>;
+}
+\end{lstlisting}
+
+Il comando con guardia alternativo (select) racchiude un numero arbitrario di comandi con guardia semplici.
+
+Vengono valutate le guardie di tutti i rami e si possono verificare 3 casi:
+\begin{itemize}
+    \item \textbf{se una o più guardie sono valide}: viene scelto, in maniera non deterministica, uno dei rami con guardia valida e la relativa guardia viene eseguita, viene quindi eseguita
+    l'istruzione relativa al ramo scelto, e con ciò termina l'esecuzione dell'intero comando alternativo;
+    \item \textbf{se tutte le guardie non fallite sono ritardate}: il processo in esecuzione si sospende in attesa che arrivi un messaggio che abilita la transizione di una guardia da
+    ritardata a valida e a quel punto procede come nel caso precedente;
+    \item \textbf{se tutte le guardie sono fallite}: il comando termina.
+\end{itemize}
+
+\vspace{5mm}
+\textbf{Comando con guardia ripetitivo}
+
+\vspace{3mm}
+
+\begin{lstlisting}
+do {
+    [] <guardia_1> -> <istruzione_1>;
+    ...
+    [] <guardia_n> -> <istruzione_n>;
+}
+\end{lstlisting}
+
+Vengono valutate le guardie di tutti i rami e si possono verificare 3 casi:
+\begin{itemize}
+    \item \textbf{se una o più guardie sono valide}: viene scelto in maniera non deterministica uno dei rami con guardia valida e la relativa guardia viene eseguita, viene quindi eseguita
+    l'istruzione relativa al ramo scelto, e poi si passa al ciclo successivo (ripetizione);
+    \item \textbf{se tutte le guardie non fallite sono ritardate}: il processo in esecuzione si sospende in attesa che arrivi un messaggio che abilita la transizione da una guardia ritardata
+    a valida; e a quel punto procede come nel caso precedente (si itera);
+    \item \textbf{se tutte le guardie sono fallite}: l'esecizione del comando termina.
+\end{itemize}
+
+\subsubsection{Primitive di comunicazione asincrone}
+
+Nel modello a scambio di messaggi, lo strumento di comunicazione di più basso livello è la \textbf{send asincrona}.
+
 
 
 
