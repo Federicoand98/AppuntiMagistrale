@@ -1998,8 +1998,256 @@ Vengono valutate le guardie di tutti i rami e si possono verificare 3 casi:
 
 \subsubsection{Primitive di comunicazione asincrone}
 
-Nel modello a scambio di messaggi, lo strumento di comunicazione di più basso livello è la \textbf{send asincrona}.
+Nel modello a scambio di messaggi, lo strumento di comunicazione di più basso livello è la \textbf{send asincrona}. Nel quale ad ogni operazione associata alla risorsa corrisponde
+un diverso servizio.
 
+\vspace{3mm}
+\textit{Accesso a risorse "condivise" -> processi servitori}
+
+\vspace{3mm}
+
+Verranno ora analizzate delle \textbf{soluzioni di problemi di sicronizzazioen con send asicrona}.
+
+Prendendo in considerazioen alcuni tipici problemi di interazione nel modello a scambio di messaggi. Quindi ci si chiede: data una risorsa, come implementare nel modello a scambio
+di messaggi (con send asincrona) il gestore della risorsa nel caso in cui sia previsto:
+\begin{itemize}
+    \item una sola operazione;
+    \item più operazioni mutuamente esclusive;
+    \item più operazini con condizioni di sincronizzazione.
+\end{itemize}
+
+\vspace{5mm}
+{\large \textbf{1. Risorsa condivisa con una sola operazione}}
+
+\vspace{3mm}
+Risorsa condivisa che mette a disposizioen di un insieme di processi "clienti" una sola operazione con il solo vincolo della mutua esclusione.
+
+\vspace{3mm}
+\textbf{Soluzione nel modello a memoria comune}: il gestore è un \textbf{monitor} con \textbf{una operazioen entry}
+
+\noindent
+\begin{minipage}{.45\columnwidth}
+\begin{lstlisting}
+monitor gestore {
+    tipo_var var;
+    <eventuale inizializzazione>;
+    entry tipo_out fun(tipo_in x) {
+        <corpo della funzione fun>;
+    }
+}
+
+gestore ris; // istanza del gestore
+\end{lstlisting}
+\end{minipage}\hfill
+\begin{minipage}{.45\columnwidth}
+\begin{lstlisting}
+thread client {
+    tipo_in a;
+    tipo_out b;
+
+    b = ris.fun(a);
+}
+\end{lstlisting}
+\end{minipage}
+
+\vspace{3mm}
+\textbf{Soluzione nel modello a scambio di messaggi}:
+
+La risorsa viene gestita da un \textbf{processo server} che offre un unico servizio senza condizioni di sincronizzazione.
+
+\noindent
+\begin{minipage}{.45\columnwidth}
+\begin{lstlisting}
+// cliente: un solo canale risposta di tipo tipo_out
+
+process cliente {
+    port tipo_out risposta;
+    tipo_in a;
+    tipo_out b;
+    process p;
+    ...
+    send(a) to server.input;
+    p = receive(b) from risposta;
+    ...
+}
+\end{lstlisting}
+\end{minipage}\hfill
+\begin{minipage}{.45\columnwidth}
+\begin{lstlisting}
+// server: un solo canale input di tipo tipo_in
+
+tipo_out fun(tipo_in x);
+
+process server {
+    port tipo_in input;
+    tipo_var var;
+    process p;
+    tipo_in x;
+    tipo_out y;
+    <eventuale inizializzazione>;
+    while(true) {
+        p = receive(x) from input;
+        y = fun(x);
+        send(y) to p.risposta;
+    }
+}
+\end{lstlisting}
+\end{minipage}
+
+\vspace{5mm}
+{\large \textbf{2. Risorsa condivisa con più operazioni}}
+
+\vspace{3mm}
+Risorsa condivisa che mette a disposizione di un insieme di processi clienti due operazioni con il solo vincolo della mutua esclusione.
+
+\vspace{3mm}
+\textbf{Soluzione nel modello a memoria comune}: il gestore è un monitor con \textbf{due operazioni entry}:
+
+\noindent
+\begin{minipage}{.45\columnwidth}
+\begin{lstlisting}
+monitor gestore {
+    tipo_var var;
+    ...
+    entry tipo_out1 fun1(tipo_in1 x1) {
+        <corpo della funzione fun1>;
+    }
+    entry tipo_out2 fun2(tipo_in2 x2) {
+        <corpo della funzione fun2>;
+    }
+}
+
+gestore ris;
+\end{lstlisting}
+\end{minipage}\hfill
+\begin{minipage}{.45\columnwidth}
+\begin{lstlisting}
+thread client {
+    tipo_in1 a1;
+    tipo_in2 a2;
+    tipo_out1 b1;
+    tipo_out2 b2;
+    ...
+    b1 = ris.fun1(a1);
+    ...
+    b2 = ris.fun2(a2);
+}
+\end{lstlisting}
+\end{minipage}
+
+\vspace{3mm}
+\textbf{Soluzione nel modello a scambio di messaggi}:
+
+La risorsa è gestita da un processo servitore che offre 2 servizi senza condizioni di sincronizzazione.
+
+\begin{itemize}
+    \item soluzione senza comandi con guardia: un solo canale per entrambi i tipi di richiesta. [codice]
+    \item Soluzione con comandi con guardia: per ogni servizio il server apre un canale distinto. [codice]
+\end{itemize}
+
+\vspace{5mm}
+{\large \textbf{3. Risorsa condivisa con più operazioni e condizioni di sincronizzazione}}
+
+\vspace{3mm}
+La risorsa è gestita da un processo servitore che offre \textbf{due operazioni di sincronizzazione}
+
+\vspace{3mm}
+\textbf{Soluzione nel modello a memoria comune}: la risorsa è gestita da un monitor con 2 entry e 2 variabili condizione
+
+\begin{lstlisting}
+condition c1, c2;
+\end{lstlisting}
+\noindent
+\begin{minipage}{.45\columnwidth}
+\begin{lstlisting}
+entry tipo_out1 op1(tipo_in1 x1) {
+    ...
+    if(!cond1)
+        wait(c1);
+    ...
+    signal(c2);
+    ...
+}
+\end{lstlisting}
+\end{minipage}\hfill
+\begin{minipage}{.45\columnwidth}
+\begin{lstlisting}
+entry tipo_out2 op2(tipo_in2 x2) {
+    ...
+    if(!cond2)
+        wait(c2);
+    ...
+    signal(c1);
+    ...
+}
+\end{lstlisting}
+\end{minipage}
+
+\vspace{3mm}
+\textbf{Soluzione nel modello a scambio di messaggi}:
+
+La risorsa è gestita da \textbf{un processo servitore con due servizi}:
+\begin{itemize}
+    \item viene associato ad ogni servizio un canale distinto;
+    \item la ricezione delle richieste in arrivo viene realizzata con un \textbf{comando con guardia ripetitivo}, con due rami (uno per servizio); in ogni ramo la
+    \textbf{guardia logica} esprime la \textbf{condizione di sincronizzazione}
+\end{itemize}
+
+\begin{lstlisting}
+tipo_out1 fun1(tipo_in1 x1);
+tipo_out2 fun2(tipo_in2 x2);
+
+process server {
+    port tipo_in1 input1;
+    port tipo_in2 input2;
+    tipo_var var;
+    tipo_in1 x1;
+    tipo_in2 x2;
+    tipo_out1 y1;
+    tipo_out2 y2;
+    ...
+    do {
+        [] (cond1);
+            p = receive (x1) from input1; -> {
+                y1 = fun1(x1);
+                send(y1) to p.risposta1;
+            }
+        [] (cond2);
+            p = receive (x2) from input2; -> {
+                y2 = fun2(x2);
+                send (y2) to p.risposta2;
+            }
+    }
+}
+\end{lstlisting}
+
+\vspace{3mm}
+\textbf{Corrispondenza tra monitor e processi servitori}
+\begin{center}
+\begin{tabular}{||p{6cm}|p{6cm}||}
+    \hline
+    \textbf{Modello a memoria comune} & \textbf{modello a scambio di messaggi} \\
+    \hline
+    \textbf{risorsa condivisa}: istanza di un monitor & \textbf{risorsa condivisa}: struttura dati locale a un processo server \\
+    \hline
+    identificatore di funzione di accesso al monitor & porta del processo server \\
+    \hline
+    tipo dei parametri della funzione & tipo della porta \\
+    \hline
+    tipo del valore restituito dalla funzione & tipo della porta da cui il processo cliente rivece il risultato \\
+    \hline
+    per ogni funzione del monitor & un ramo (comando con guardia) dell'istruzione ripetitiva che costituisce il corpo del server \\
+    \hline
+    condizione di sincronizzazione di una funzione entry & guardia logica componente del ramo corrispondente alla funzione \\
+    \hline
+    chiamata di funzione entry & invio (send) della richiesta sulla corrispondente porta del server e attesa (receive) dei risultati sulla propria porta \\
+    \hline
+    esecuzione in mutua esclusione fra le chiamate alle funzioni del monitor & scelta di uno dei rami con guardia valida del comando ripetitivo del server \\
+    \hline
+    corpo della funzione & istruzione del ramo corrispondente alla funzione \\
+    \hline
+\end{tabular}
+\end{center}
 
 
 
