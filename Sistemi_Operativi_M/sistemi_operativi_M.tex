@@ -37,6 +37,9 @@ postbreak = \raisebox{0ex}[0ex][0ex]{\ensuremath{\hookrightarrow}}
 \begin{document}
 
 \maketitle
+
+\newpage
+
 \tableofcontents
 
 \newpage
@@ -2248,6 +2251,450 @@ process server {
     \hline
 \end{tabular}
 \end{center}
+
+\subsubsection{Esempi}
+
+
+\subsubsection{Realizzazione dei meccanismi di comunicazione}
+
+{\large \textbf{Realizzazione delle primitive asincrone}}
+
+\vspace{3mm}
+Realizzazione delle primitive di comunicazione de del costrutto port utilizzando gli strumenti di comunicazione offerti dal nucleo del sistema operativo.
+
+Realizzazioen in Architetture \textbf{mono/multielaboratore e architetture distribuite}.
+
+\vspace{5mm}
+\textbf{Architetture mono e multielaboratore}
+
+Ipotesi:
+\begin{itemize}
+    \item Tutti i messaggi scambiati tra i processi sono di un \textbf{unico tipo T} predefinito a livello di nucleo;
+    \item Tutti i canali sono \textbf{da molti ad uni (port)} e quindi associati al processo ricevente;
+    \item Essendo le primitive asincrone, ogni porta deve contenere un buffer di lunghezza indefinita.
+\end{itemize}
+
+\noindent
+\begin{minipage}{.45\columnwidth}
+\begin{lstlisting}
+typedef struct {
+    T informazione;
+    PID mittente;
+    messaggio *successivo;
+} messaggio;
+\end{lstlisting}
+\end{minipage}\hfill
+\begin{minipage}{.45\columnwidth}
+\begin{lstlisting}
+typedef struct {
+    messaggio *primo;
+    mesasggio *ultimo;
+} coda_di_messaggi;
+\end{lstlisting}
+\end{minipage}
+
+\begin{lstlisting}
+void inserisci(messaggio *m, coda_di_messaggi c) {
+    if (c.primo == null)
+        c.primo = m;
+    else
+        c.ultimo -> successivo = m;
+    
+    m->successivo = null;
+}
+\end{lstlisting}
+
+\begin{lstlisting}
+messaggio *estrai(coda_di_essaggi c) {
+    messaggio *pun;
+    pun = c.primo;
+    c.primo = c.primo->successivo;
+    if (c.primo == null)
+        c.ultimo = null;
+    return pun;
+}
+\end{lstlisting}
+
+\begin{lstlisting}
+boolena coda_vuota(coda_di_messaggi c) {
+    if(c.primo == null)
+        return true;
+    return false;
+}
+
+typedef struct {
+    coda_di_messaggi coda;
+    p_porta puntatore;
+} des_porta;
+
+typedef des_porta *p_porta;
+
+// descrittore del processo
+typedef struct {
+    p_porta porte_processo[M];
+    PID nume;
+    modalita_di_servizio servizio;
+    tipo_contesto contesto;
+    tipo_stato stato;
+    PID padre;
+    int N_figli;
+    des_figlio prole[max_figli];
+    p_des successivo;
+} des_processo;
+\end{lstlisting}
+
+\begin{lstlisting}
+boolean bloccato_su(p_des p, int ip) {
+    <testa il campo stato nel descrittore del processo di cui p è il puntatore e restituisce il valore true se il processo risulta bloccato in attesa di ricevere messaggi
+    dalla porta il cui indice nel campo porte_processo è ip>;
+}
+\end{lstlisting}
+
+\begin{lstlisting}
+void blocca_su(int ip) {
+    <modifica il campo stato del descrittore del processo_in_esecuzione per indicare che lo stesso si blocca in attesa di messaggi dalla porta il cui indice nel campo porte_processo è ip>;
+}
+\end{lstlisting}
+
+\begin{lstlisting}
+// verifica la presenza di messaggi
+void testa_porta(int ip) {
+    p_des esec = processo_in_esecuzione;
+    p_porta pr = esec->porte_processo[ip];
+    if(coda_vuota(pr->coda)) {
+        // sospensione
+        blocca_su(ip);
+        assegnazione_CPU; // context switch
+    }
+}
+
+messaggio *estrai_da_porta(int ip) {
+    messaggio *m;
+    p_des = processo_in_esecuzione;
+    p_porta pr = esec->porte_processo[ip];
+    m = estrai(pr->coda);
+    return m;
+}
+
+void inserisci_porta(messaggio *m, PID proc, int ip) {
+    p_des destinatario = descrittore(proc);
+    p_porta pr = destinatario->porte_processo[ip];
+    inserisci(m, pr->coda);
+    if(bloccato_su(destinatario, ip))
+        attiva(destinatario);
+}
+\end{lstlisting}
+
+\begin{lstlisting}
+void send(T inf, PID proc, int ip) {
+    messaggio *m = new messaggio;
+    m->informazione = inf;
+    m->mittente = processo_in_esecuzione;
+    inserisci_porta(m, proc, ip);
+}
+
+void receive(T *inf, PID *proc, int ip) {
+    messaggio *m;
+    testa_porta(ip);
+    m = estrai_da_porta(ip);
+    *proc = m->mittente;
+    *inf = m->informazione;
+}
+\end{lstlisting}
+
+Nelle slide è presente anche l'esempio di ricezione su più canali.
+
+\vspace{5mm}
+\textbf{Architetture distribuite}
+
+Insieme di nodi tra loro omogenei e tutti dotati dello stesso sistema operativo (stesso nucleo).
+
+\vspace{3mm}
+Scopo del sistema: geestire tutte le risorse nascondendo all'utente la loro distribuzione sulla rete.
+
+\vspace{3mm}
+\textbf{Sistemi operativi di rete (nos)}: insieme di nodi eterogenei, con sistemi operativi diversi e autonomi, nodo per nodo.
+
+Ogni nodo della rete è in grado di offrire servizi a clienti remoti presenti su altri nodi della rete.
+
+Trasparenza della distribuzione delle risorse viene ottenuta mediante il middleware.
+
+immagini
+
+
+
+codice
+
+
+
+\section{Algoritmi di Sincronizzazione Dstribuiti}
+
+Il modello a scambio di messaggi è la naturale astrazione di un sistema distribuito, nel quale processi distinti eseguono su nodi fisicamente separati, collegati tra di loro
+attraverso una rete.
+
+Caratteristiche dei sistemi distribuiti:
+\begin{itemize}
+    \item concorrenza/parallelismo delle attività nei nodi;
+    \item assenza di risorse condivise tra nodi;
+    \item assenza di un clock globale;
+    \item possibilità di malfunzionamenti indipendenti:
+    \begin{itemize}
+        \item nei nodi (crash/attacchi/...);
+        \item nella rete di comunicazione (ritardi, perdite di messaggi, ecc..).
+    \end{itemize}
+\end{itemize}
+
+\vspace{3mm}
+Nelle applicazioni distribuite è importante poter soddisfare alcune proprietà:
+\begin{itemize}
+    \item \textbf{scalabilità}: nell'applicazione distribuita le prestazioni dovrebbero aumentare al crescere del numero di nodi utilizzati;
+    \item \textbf{tolleranza ai guasti}: l'applicazione è in grado di funzionare anche in presenza di guasti.
+\end{itemize}
+
+\vspace{5mm}
+\textbf{Prestazioni: speedup}
+
+\vspace{3mm}
+Oltre al tempo di calcolo, un indicatore per misurare le prestazioni di un sistema parallelo/distribuito è dato dallo speedup.
+
+Ipotizzando che la stessa applicazione possa essere eseguita su un numero variabili di nodi:
+
+lo speedup per n nodi è il rapporto tra il tempo di esecuzione dell'applicazione ottenuto con un solo nodo e quello ottenuto con n nodi:
+
+\begin{center}
+    \[Speedup(1) = \frac{Tempo(1)}{Tempo(n)}\]
+\end{center}
+
+\vspace{5mm}
+\textbf{Tolleranza ai guasti}
+
+\vspace{3mm}
+Il sistema distribuito tollerante ai guasti riesce a erogare i propri servizi anche in presenza di guasti in uno o più nodi.
+
+Tipi di guasto:
+\begin{itemize}
+    \item Transienti;
+    \item Intermittenti;
+    \item Persistenti.
+\end{itemize}
+
+Un sistema tollerante ai guanti deve nascondere i guasti agli altri processi. Questo obiettivo può essere raggiunto, ad esempio, con tecniche di \textbf{ridondanza}:
+vengono mantenute più istanze degli stessi componenti, in modo da poter rimpiazzare l'elemento guasto con un elemento equivalente.
+
+\vspace{5mm}
+\textbf{Algoritmi di Sincronizzazione}
+
+\vspace{3mm}
+Come nel modello a memoria comune, anche nel modello a scambio di messaggi è importante poter disporre di algoritmi di sincronizzazione tra i processi concorrenti, che consentano
+di risolvere alcune problematiche comuni, coordinando i vari processi.
+
+E\' importante che gli algoritmi distribuiti godano delle proprietà di scalabilità e di tolleranza ai guasti.
+
+\subsection{Algoritmi per la gestione del tempo}
+
+\vspace{3mm}
+\textbf{Tempo nei sistemi distribuiti}
+
+\vspace{3mm}
+In un sistema distribuito, ogni nodo è dotato di un proprio orologio. Se gli orologi locali di due nodi non solo sicronizzati, è possibile che se un evento e2 accade nel nodo N2
+dopo un altro evento e1 nel nodo N1, ad e2 sia associato un istante temporali predente quello di e1.
+
+\vspace{3mm}
+Quindi in applicazioni distribuite può essere necessario:
+\begin{itemize}
+    \item disporre di un orologio fisico universale, se c'è bisogno di utilizzare l'ora esatta: a questo scopo vengono utilizzati degli algoritmi di sincronizzazione dei nodi del sistema (es. algoritmo di Berkeley, Christian)
+    \item disporre di un orologio logico, che permetta di associare ad ogni evento un istante logico (timestamp) coerente con l'ordine in cui essi si verificano.
+\end{itemize}
+
+\subsubsection{Orologi Logici (Lamport, 1979)}
+
+In un'applicazione distribuita, gli eventi sono legati da vincoli di precedenza che danno origine ad una relazione d'ordine parziale (v. algoritmi non sequenziali)
+
+\vspace{3mm}
+\textbf{Relazione di precedenza tra eventi} (happened-before,  $\rightarrow$ ):
+\begin{itemize}
+    \item se a e b sono eventi in uno stesso processo ed a si verifica prima di b: a$\rightarrow$b
+    \item se a e l'evento di invio di un messaggio e b è l'evento di ricezione dello stesso messaggio: a$\rightarrow$b
+    \item se a$\rightarrow$b e b$\rightarrow$c allora a$\rightarrow$c
+\end{itemize}
+
+\vspace{3mm}
+Data una coppia di eventi (a,b) sono possibili 3 casi:
+\begin{itemize}
+    \item a$\rightarrow$b, cioè a avviene prima di b;
+    \item b$\rightarrow$a, b avviene prima di a;
+\end{itemize}
+
+\vspace{5mm}
+Assumiamo che ad ogni evento \textbf{e} venga associato un timestamp \textbf{C(e)}.
+
+Si vuole definire un modo per misurare il concetto di tempo tale per cui ad ogni evento \textbf{a} possiamo definire un timestamp \textbf{C(a)} sul quale tutti i processi
+siano d'accordo.
+
+Il tempo C(a) deve soddisfare la seguente proprietà:
+
+\begin{center}
+    \textbf{se a$\rightarrow$b allora C(a) $<$ C(b) $[*]$}
+\end{center}
+
+\vspace{3mm}
+Quindi:
+\begin{itemize}
+    \item se all'interno di un processo \textbf{a precede b} allora \textbf{C(a) $<$ C(b)}
+    \item se \textbf{a} è l'evento di \textbf{invio} (in un processo Ps) e \textbf{b} l'evento di \textbf{ricezione} (in un processo Pr) dello stesso messaggio m allora \textbf{C(a) $<$ C(b)}
+\end{itemize}
+
+\subsubsection{Algoritmo di Lamport}
+Per garantire il rispetto della proprietà [*] ogni processo Pi gestisce localmente un contatire del tempo logico Ci, che viene gestito nel modo seguente:
+\begin{itemize}
+    \item ogni nuovo evento all'interno di Pi provoca un incremento del calore di Ci: Ci=Ci+1
+    \item ogni volta che Pi invia un messaggio m, il contatore Ci viene incrementato: Ci=Ci+1 e successivamente al messaggio viene associato il timestamp Ci: ts(m)=Ci
+    \item quando un processo Pj riceve un messaggio m, assegna al proprio contatore Cj un valore uguale al massimo tra Cj e ts(m): Cj=max\{Cj, ts(m)\} e successivamente lo incrementa di 1: Cj=Cj+1
+\end{itemize}
+
+\vspace{3mm}
+\textbf{Orologio logioco di Lamport: esempio}
+
+Considerando 3 processi in esecuzione du 3 nodi, ognuno con il proprio clock:
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.50\columnwidth]{imgs/lamport.PNG}
+\end{figure}
+
+\vspace{5mm}
+Nei sistemi distribuiti l'algoritmo di Lamport viene generalmente eseguito da uno strato software (middleware) che interfaccia i processi alla rete: i processi vedono il tempo logico.
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.60\columnwidth]{imgs/lamport2.PNG}
+\end{figure}
+
+\subsection{Mutua Esclusione Distribuita}
+L'obiettivo della mutua esclusione distribuita è quello di garantire che due o più processi non possano eseguire contemporaneamente certe attività. Ad esempio accesso a risorse
+condivise come file, stampanti, ecc..
+
+\vspace{3mm}
+Esistono 2 principali soluzioni:
+\begin{itemize}
+    \item \textbf{centralizzata}: la risorsa è gestita da un processo dedicato (coordinatore), al quale tutti i processi si rivolgono per accedervi;
+    \item \textbf{decentralizzata}: non è previsto un coordinatore, quindi i processi in competizione si sincronizzano tra loro tramite opportuni algoritmi, la cui logica è
+    distribuita tra tutti i processi.
+\end{itemize}
+
+Una soluzione decentralizzata è, in generale, più scalabile di soluzioni centralizzate, nelle quali il processo gestore della risorsa rappresenta un collo di bottiglia.
+
+\vspace{5mm}
+\textbf{Soluzioni al problema della mutua esclusione distribuito}
+
+\vspace{3mm}
+In generale, possiamo suddividere le soluzioni in due categorie:
+\begin{itemize}
+    \item \textbf{Permission-based}: ogni processo che vuole eseguire la sua sezione critica, richiede un permesso ad uno o più processi;
+    \item \textbf{Token-based}: un "testimone" (token) viene passato tra i vari processi in competizione: il processo che possiede il token può:
+    \begin{itemize}
+        \item eseguire la sua sezione critica;
+        \item passare il token ad un altro processo, se non intenzionato ad entrare nella sezione critica.
+    \end{itemize}
+\end{itemize}
+
+\vspace{3mm}
+Gli algoritmi token-based sono sempre decentralizzati, mentre gli algoritmi permission-based possono essere sia centralizzati che decentralizzati.
+
+\subsubsection{Mutua esclusione: soluzione centralizzata}
+
+L'algoritmo si basa su \textbf{permessi} (permission-based):
+\begin{itemize}
+    \item la risorsa viene gestita da un processo coordinatore al qiale ogni processo che vuole eseguire la sua sezione critica si rivolge per ottenere il permesso.
+    \item per eseguire la propria sezione critica ogni proccesso Pi:
+    \begin{itemize}
+        \item \textbf{Richiesta}: Pi invia una richiesta di autorizzazione al coordinatore; quando verrà accolta, il processo Pi otterrà il permesso.
+        \item viene eseguita la sezione critica
+        \item \textbf{Rilascio}: Pi comunica al coordinatore il termine della sezione critica
+    \end{itemize}
+\end{itemize}
+
+Il coordinatore \textbf{concede un permesso alla volta}: ogni Richiesta ricevuta da un processo Pi mentre l'autorizzazione è concessa al processo Pj viene messa in attesa. Inoltre
+il coordinatore mantiene una coda delle Richieste in attesa.
+
+\vspace{5mm}
+\textbf{Esempio:}
+
+\vspace{3mm}
+\begin{itemize}
+    \item P1 chiede il permesso al coordinatore, che autorizza l'accesso;
+    \item P2 chiede il permesso al coordinatore, che non può concederlo perchè P1 sta eseguendo la sua sezione critica; il coordinatore non risponde e inserisce la richiesta di P2 nella coda;
+    \item quando P1 termina la sua sezione critica, invia un messaggio di Rilascio al coordinatore, che quindi può successivamente autorizzare P2.
+\end{itemize}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.70\columnwidth]{imgs/mutua_centrale.PNG}
+\end{figure}
+
+\vspace{3mm}
+\textbf{Vantaggi}:
+
+L'algoritmo è equo, e quindi non c'è starvation. Inoltre prevede solo 3 messaggi per ogni sezione critica: richiesta, autorizzazione e rilascio.
+
+\vspace{3mm}
+\textbf{Svantaggi}:
+
+\textbf{Scalabilità}: la soluzione è poco scalabile perchè al crescere del numero dei processi il coordinatore piò diventare un collo di bottiglia.
+
+\textbf{Tolleranza ai guasti}:
+\begin{itemize}
+    \item il coordinatore può essere soggetto a guasto e, in questo caso, l'intero sistema si blocca (single point of failure)
+    \item inoltre, se un processo P che ha fatto una richiesta non ottiene una risposta, P non può distinguere le due possibili cause:
+    \begin{itemize}
+        \item autorizzazione non concessa;
+        \item coordinatore guasto
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{Mutua esclusione: Algoritmo Ricart-Agrawala}
+
+Algoritmo decentralizzato basato su permessi (permission-based). Il sistema è costituito da un insieme di processi in competizione. Ad ogni processo sono associate 2 attività
+concorrenti (thread):
+\begin{itemize}
+    \item \textbf{main}: il thread che esegue la sezione critica
+    \item \textbf{receiver}: thread dedicato alla ricezione delle autorizzazioni
+\end{itemize}
+
+\vspace{3mm}
+Questo algoritmo ha un requisito. Ovvero è richiesta la presenza di un temporizzatore globale per tutti i nodi (orologio logico): ogni messaggio è corredato da un timestamp che ne indica l'istante di invio.
+
+\vspace{3mm}
+\textbf{Struttura del main}:
+
+Quando um processo vuole entrare nella sezioen critica:
+\begin{enumerate}
+    \item invia (n-1) richieste di autorizzazioen ai receiver degli altri (n-1) nodi: \textbf{Request(Pid, timestamp)};
+    \item attende le \textbf{(n-1) autorizzazioni};
+    \item esegue la \textbf{sezione critica};
+    \item invia \textbf{ok} a tutte le richieste in attesa.
+\end{enumerate}
+
+\vspace{3mm}
+\textbf{Struttura del receiver}:
+
+Quando riceve una richiesta, il receiver può trovarsi in uno di tre possibili stati:
+\begin{enumerate}
+    \item \textbf{Released}: il processo non è interessato ad entrare nella sezione critica: risponde OK
+    \item \textbf{Wanted}: il processo è in procinto di entrare nella sezione critica (attende autorizzazione): confronta il timestamp Tr della richiesta ricevuta con quello della richiesta inviata Ts:
+    \begin{itemize}
+        \item se Tr$<$Ts risponde OK
+        \item altrimenti non risponde e mette la richiesta ricevuta in coda
+    \end{itemize}
+    \item \textbf{Help}: il processo sta eseguendo la sezione critica: la richiesta viene messa in coda.
+\end{enumerate}
+
+
+
+
+
+
+
+
 
 
 
