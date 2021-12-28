@@ -2688,6 +2688,110 @@ Quando riceve una richiesta, il receiver può trovarsi in uno di tre possibili s
     \item \textbf{Help}: il processo sta eseguendo la sezione critica: la richiesta viene messa in coda.
 \end{enumerate}
 
+\vspace{5mm}
+\textbf{Esempio:}
+
+Consideriamo 3 processi: P0, P1, P2.
+
+Se P0 e P2 vogliono eseguire una sezione critica, cioè sono entrambi nello stato W:
+\begin{itemize}
+    \item P0 invia a P1 e P2 una Richiesta (timestamp=5)
+    \item P2 invia a P0 e P1 una Richiesta (timestamp=8)
+\end{itemize}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.30\columnwidth]{imgs/al1.PNG}
+\end{figure}
+
+P0 è in stato WANTED: non risponde a P2 perchè 5$<$8 e mette in coda la sua richiesta.
+
+P1 è in stato RELEASED: risponde ad entrambi OK.
+
+P2 è in stao WANTED: risponde OK a P0 perchè 5$<$8.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.30\columnwidth]{imgs/al2.PNG}
+\end{figure}
+
+P0 esegue la sezione critica.
+
+Terminata la sezione critica, P0 invia OK a P2, la cui richiesta era stata accodata
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.30\columnwidth]{imgs/al3.PNG}
+\end{figure}
+
+P2 esegue la sezione critica.
+
+\vspace{5mm}
+\textbf{Vantaggi e svantaggi dell'algoritmo Ricart-Agrawala}
+
+\textbf{Vantaggi}: distribuizione ed una seguente scalabilità.
+
+\textbf{Svantaggi}: maggior costo di comunicazione per il singolo partecipante, 2*(N-1) messaggi per ogni sezione critica. Inoltre non c'è più un single point of failure, ma
+N points of failure: se uno dei nodi va in crash, non risponderà alle richieste degli altri. In più è impossibile rilevare il guasto, quindi impossibile sapere se l'attesa è
+dovuta ad un guasto o a sezioni critiche in esecuzione.
+
+\vspace{3mm}
+\textbf{Guasti nell'algoritmo Ricart-Agrawala}
+
+Per la rilevazione di guasti si può modificare il protocollo prevedendo che ad ogni richiesta venga sempre fornita una risposta:
+\begin{itemize}
+    \item OK
+    \item Attendi (autorizzazione negata): in questo caso il richiedente si mette in attesa di un OK
+\end{itemize}
+
+Il richiedente può impostare un timeout per rilevare guasti del destinatario.
+
+Invece per gli N points of failure, ogni processo ha un ruolo equivalente agli altri; se è guasto può essere escluso dal gruppo.
+
+\subsubsection{Mutua Esclusione: Algoritmo Token ring}
+
+Algoritmo distribuito basato su token. Il sistema è costituito da un insieme di processi in competizione, collegati tra loro secondo una topologia logica ad anello.
+Ogni processo conosce i suoi vicini nell'anello. Un messaggio (detto token), circola attraverso l'anello, nel verso relativo all'ordine dei processi nella topologia.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.30\columnwidth]{imgs/ring.PNG}
+\end{figure}
+
+Il token rappresenta il permesso unico di eseguire sezioni critiche: chi detiene il token può eseguire la sua sezione critica.
+
+Il token viene inizialmente inviato da P0 a P1:
+\begin{itemize}
+    \item P1 può essere nello stato WANTED: in questo caso trattiene il token ed esegue la sezione critica; al termine passa il token al processo successivo P2;
+    \item P1 può essere nello stato RELEASED: in questo caso passa il token al processo successivo P2.
+\end{itemize}
+
+P2 si comporta allo stesso modo di P1, come tutti i processi successivi nell'anello.
+
+In questo modo il token circola nell'anello nel verso stabilito dall'ordine dei processi.
+
+\vspace{3mm}
+\textbf{Vantaggi}: distribuzione ed una seguente scalabilità.
+
+\textbf{Svantaggi}: il numeso di messaggi per ogni sezione critica non è limitato. Non c'è più un single point of failure ma N points of failure: se uno dei nodi va in crash
+interrompe l'intera catena. Per far fronte a questo probelma si può modificare il protocollo prevedendo che ad ogni invio del token (da Pi a Pi+1) venga sempre restituita
+una risposta, se la risposta non arriva (allo scadere di un timeout) Pi+1 viene escluso dall'anello ed il token viene inviato a Pi+2. Un'ultimo problema è che c'è la possibilità
+di perdere il token, se ad esempio il processo che detiene il token va in crash il token va perduto.
+
+\subsubsection{Confronto tra i 3 algoritmi di mutua esclusione}
+\begin{center}
+    \begin{tabular}{||p{6cm}|p{6cm}||}
+        \hline
+
+        \hline
+    \end{tabular}
+    \end{center}
+
+
+
+
+
+
 
 
 
