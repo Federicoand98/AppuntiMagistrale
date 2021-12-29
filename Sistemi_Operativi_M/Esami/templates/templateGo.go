@@ -24,7 +24,7 @@ type Richiesta struct {
 /////////////////////////////////////////////////////////////////////
 // Canali
 /////////////////////////////////////////////////////////////////////
-var entrata = make(chan int, MAXBUFF) // necessità di accodamento per priorità
+var entrata = make(chan int, MAXBUFF)
 var uscita = make(chan int)
 var ACK [MAXPROC]chan int // alternativa alla richiesta
 
