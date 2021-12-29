@@ -4,6 +4,7 @@
 \usepackage{parcolumns}
 \usepackage{graphicx}
 \usepackage[usenames,dvipsnames,svgnames,table]{xcolor}
+\usepackage{amsmath}
 
 \setlength\parindent{0pt}
 
@@ -30,13 +31,20 @@ postbreak = \raisebox{0ex}[0ex][0ex]{\ensuremath{\hookrightarrow}}
 
 \lstset{style=mystyle}
 
-\title{Sistemi Operativi M}
+\title{Appunti del corso di Sistemi Operativi M}
 \author{Federico Andrucci}
-\date{September 2021}
+\date{AA 2021/2022}
 
 \begin{document}
 
 \maketitle
+
+\vfill
+\begin{center}
+\textbf{DISCLAIMER}: 
+
+Questi appunti potrebbero contenere errori e/o imprecisioni, di conseguenza non mi assumo alcuna responsabilità sull'utilizzo di questo pdf.
+\end{center}
 
 \newpage
 
@@ -93,11 +101,6 @@ Invece di leggere una singola istruzione del sistema ospitato, legge interi bloc
 Il vantaggio in termini prestazionali rispetto all'interpretazione è notevolmente maggiore.
 
 Ad esempio parti di codice utilizzati frequentemente vengono bufferizzati nella cache per evitare di doverli ricompilare in seguito.
-
-
-..
-..
-..
 
 
 \subsection{Realizzaione del VMM}
@@ -190,7 +193,7 @@ Il principale limite della Fast Binary Translation è che la traduzione dinamica
 copia della macchina fisica, con la possiblità di installare gli stessi s.o. di architetture non virtualizzate.
 
 \subsubsection{Paravirtualizzazione}
-Il VMM (hypervison) offre al sistema operativo guest un'interfaccia virtuale (ovviamente differente da quello hardware del processore) chiamata **hypercall API**
+Il VMM (hypervison) offre al sistema operativo guest un'interfaccia virtuale (ovviamente differente da quello hardware del processore) chiamata \textbf{hypercall API}
 alla quale i s.o. guest devono rifersi per avere accesso alle risorse (system call).
 
 Queste Hypercall API permettono di:
@@ -201,9 +204,6 @@ Queste Hypercall API permettono di:
 \end{itemize}
 
 Le prestazioni rispetto alla Fast Binary Translation sono notevolmente superiori, però ovviamente c'è una necessità di porting dei dei s.o. guest (non sempre facile).
-
-(aggiungere protezione processore)
-
 
 \newpage
 
@@ -216,7 +216,7 @@ non autorizzati al sistema e i conseguenti tentativi dolosi di alterazione e dis
 \textbf{Protezione}: insieme di attività volte a garantire il controllo dell'accesso alle risorse logiche e fisiche da parte degli utenti autorizzati
 all'uso di un sistema di calcolo.
 
-La sicurezza mette a disposizione meccanismi di **identificazione, autenticazione, ...**
+La sicurezza mette a disposizione meccanismi di \textbf{identificazione, autenticazione, ...}
 
 Per rendere un sistema sicuro è necessario stabilire per ogni utente autorizzato:
 \begin{itemize}
@@ -550,8 +550,206 @@ Il requisito della \textbf{verificabilità} è difficile da soddisfare per un si
 
 \section{Programmazione Concorrente}
 
+La programmazione concorrente è l'insieme delle tecniche, metodologie e strumenti per il supporto all'esecuzione di sistemi software composti da insiemei di attività svolte
+simultaneamente.
 
+\vspace{5mm}
+\textbf{Tipi di Applicazioni}
+\begin{itemize}
+    \item \textbf{Multithreaded}: applicazioni strutturate come un insieme di processi con lo scopo di aumentare l'efficienza, ridurre la complessità e la programmazione. I processi posssono
+    condividere variabili, generalmente esistono più processi che processori; e i processi vengono schedulati ed eseguiti indipendentemente.
+    \item \textbf{Sistemi multitasking/Sistemi Distribuiti}: le componenti dell'applicazione (task) vengono eseguite sui nodi, generalemente virtuali, collegati tramite opportuni mezzi
+    di interconnessione. E i processi comunicano scambiandosi messaggi.
+    \item \textbf{*Applicazioni Parallele}: applicazioni che sfruttano al massimo il parallelismo disponibile a livello HW. Infatti vengono eseguite su sistemi specificatamente paralleli
+    come HPC o processori vettoriali, facendo largo uso di algoritmi paralleli. A seconda del modello architetturale, l'esecuzione è portata avanti da istruzioni/thread/processi paralleli
+    che interagiscono utilizzando specifiche librerie.
+\end{itemize}
 
+\vspace{5mm}
+\textbf{Processi non sequenziali e tipi di interazione}
+
+\begin{itemize}
+    \item \textbf{Algoritmo}: procedimento logiche che deve essere eseguito per risolvere in determinato problema
+    \item \textbf{Programma}: descrizione di un algoritmo mediante un opportuno formalismo (linguaggio di programmazione), che rende possibile l'esecuzione dell'algoritmo da parte di un
+    particolare elaboratore
+    \item \textbf{Processo}: insieme ordinato degli eventi cui dà luogo un elaboratore quando opera sotto il controllo di un programma.
+    \item \textbf{elaboratore}: entità astratta realizzata in HW e parzialmente in SW in grado di eseguire programmi
+    \item \textbf{Evento}: esecuzione di un'operazione tra quelle apparteneti all'insieme che l'elaboratore sa riconoscere ed eseguire, ogni evento determina una **transizione di stato**
+    dell' elaboratore.
+\end{itemize}
+
+Quindi un programma non descrive un processo, ma un insieme di rpocessi, ognuno dei quali è relativo all'esecuzione del programma da parte dell'elaboratore per un determinato....
+
+\vspace{5mm}
+\textbf{Processo Sequenziale}: sequenza di stati attraverso i quali passa l'elaboratore durante l'esecuzione di un programma.
+
+\vspace{3mm}
+Un processo può essere rappresentato tramite un grafo orienteto detto \textbf{grafo di precedenza del processo}, costituito da nodi ed archi orientati:
+\begin{itemize}
+    \item i nodi del grafo rappresentano i singoli eventi del processo;
+    \item gli archi orientati identificano le precedenze temporali tra tali eventi;
+\end{itemize}
+
+Ogni nodo rappresenta quindi un evento corrispondente all'esecuzione di un'operazione tra quelle appartenti all'insieme che l'eleaboratore sa riconoscere ed eseguire.
+
+\vspace{3mm}
+\textbf{Processi non sequenziali}:
+
+L'insieme degli eventi che lo descrive è ordinato secondo una relazione d'ordine parziale. Quindi per descrivere un processo non sequenziale utilizziamo
+un \textbf{grado di precedenza ad ordinamento parziale}.
+
+Per poter eseguire un processo non sequenziale, ovviamente, richiede un elaboratore non sequenziale.
+
+\vspace{3mm}
+\textbf{Processi Interagenti}: le interazioni tra processi di lettura, elaborazione e scruttira sono dettati da uno scambio di informazioni.
+
+\vspace{5mm}
+\textbf{Tipi di Decomposizione}:
+
+La decomposizione di uno sgrafo di precedenza ad ordinamento parziale può essere effettuato in modi differenti, orizzontalmente (quindi per archi), oppure
+verticalmente (per processi), generalmente si sceglie quello che permette di avere il minimo numero di interazioni possibili.
+
+\vspace{5mm}
+\textbf{Interazione tra processi}:
+
+Comprende tutte le interazoini prevedibili e desderate, insite quindi nella logica degli algoritmi. Generalmente
+prevede scambio di informazioni, o dati (quindi messaggi, e quindi comunicazione), oppure segnali temporali (senza trasfermento di dati).
+
+\vspace{3mm}
+\textbf{Competizione}:
+
+La macchina concorrente su cui i processi sono eseguiti mette a disposizione un numero linitato di risorse condivise tra i processi.
+L'obiettivo della competizione è il coordinamente dei processi nell'accesso alle risorse condivise. Quindi, nel caso determinate risorse non
+possono essere accedibili a più processi contemporaneamente, è necessario quindi prevedere dei meccanismi che facciano rispettare le regole di accesso
+delle risorse e quindi regolino la competizione (in breve è una forma di sincronizzazione in più).
+
+Un esempio è la Mutua Esclusione, nel quale, ad esempio, due processi devono utilizzate in determinati istanti una risorsa condivisa, ma questa
+risorsa può essere acceduta solamente da un processo alla volta. Quindi gli accessi alla risorsa devono essere fatti in modo mutuamente esclusivo, ovvero
+un processo alla volta.
+
+\vspace{3mm}
+\textbf{Sezione Critica}:
+
+Sequenza di istruzioni con le quali un processo accede a un oggetto condiviso con altri oggetti. Ad un oggetto può essere associata ad una sola
+sezione critica (usata da tutti i processi) o più sezioni critiche (classe di sezioni critiche). \textbf{Sezioni critiche appartenenti alla stessa classe}
+\textbf{devono escludersi mutuamente nel tempo}.
+
+\vspace{3mm}
+L'interazione tra processi può essere di puù tipi:
+\begin{itemize}
+    \item Cooperazione: sincronizzazione diretta o esplicita;
+    \item Competizione: sincronizzazione indiretta o implicita;
+    \item Interferenza: interazione provocata da errori di programmazione (deadlock), interazione non prevista e non desiderata.
+\end{itemize}
+
+\subsection{Architetture e Linguaggi per la programmazione concorrente}
+
+Proprietà che un linguaggio per la programmazione concorrente deve avere:
+\begin{itemize}
+    \item contenere appositi costrutti con i quali è possibile dichiarare moduli di programma destinati ad essere eseguiti come processi sequenziali distinti;
+    \item non tutti i processi vengono eseguiti contemporaneamente. Acluni processi vengono svolti solamente se si verificano determinate condizioni;
+    \item ocorre che siano presenti strumenti linguistici per specificare le interazioni che dinamicamente potranno verificarsi tra i vari processi.
+\end{itemize}
+
+\vspace{3mm}
+Una macchina concorrente è costituita da HW e componenti SW che permettono la multiprogrammazione. Ovviamente, in una Macchina astratta M, oltre
+ai processi di multiprogrammazione e sincronizzazioen è presente anche il meccanismo di **protezione**, e quindi il meccaniscmo di controllo
+degli accessi alle risorse, in grado di:
+\begin{itemize}
+    \item rilevare eventuali interfrerenze tra i processi;
+    \item puo essere realizzato in HW o in SW nel supporto a tempo di esecuzione;
+    \item capabilities e liste di controllo degli accessi.
+\end{itemize}
+
+\vspace{3mm}
+Il kernel offre supproto a tempo di esecuzione di un linguaggio concorrente.
+Nel kernel sono sempre presenti due funzionalità base:
+\begin{itemize}
+    \item meccanismo di multiptogrammazione;
+    \item meccanismo di sincronizzazione e comunicazione.
+\end{itemize}
+
+\vspace{5mm}
+\textbf{Architettura di M}:
+
+Due diverse organizzazioni logiche:
+\begin{itemize}
+    \item gli elaboratori di M sono collegati ad un'unica memoria principale (sistemi multiprocessore);
+    \item gli elaboratori di M sono collegati da una sottorete di comunicazione, senza memoria comune.
+\end{itemize}
+
+\vspace{3mm}
+Queste due organizzazioni logiche di M definiscono due modelli di interazione tra i processi:
+\begin{itemize}
+    \item Modello a memoria comune, nel quale l'interazione tra i processi avviene tramite oggetti contenuti nella memoria comune (modello ad ambiente globale);
+    \item Modello a scambio di messaggi, nel quale la comunicazione e la sincronizzazione tra i processi si basa sullo scambio di messaggi sulla rete che collega
+    i vari elaboratori.
+\end{itemize}
+
+\subsection{Costrutti linguistici per la specifica della concorrenza}
+
+\textbf{Fork/Join}
+
+L'esecuzione di una \textbf{fork} (non la system call unix) coincide con la creazioen e l'attivazione di un processo che inizia la propria esecuzioen in parallelo
+con quella del processo chiamante.
+
+La \textbf{join} è una primitiva di sincronizzazione che permette di determinare quando un processo, creato tramite la fork, ha terminato il suo compito,
+sincronizzandosi con tale evento.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.50\columnwidth]{imgs/fork.PNG}
+\end{figure}
+
+\vspace{5mm}
+\textbf{Cobegin-Coend}:
+
+Alternativa al modello fork/join, prende ispirazione al modello di programmazione strutturata.
+
+\begin{lstlisting}
+s_0;
+cobegin
+    s_1;
+    s_2;
+    s_2;
+coend
+s_4;
+\end{lstlisting}
+
+Le istruzioni S1, S2,..Sn sono eseguite in parallelo. Ogni si può contenere altre istruzioni cobegin..coend al suo interno.
+
+\vspace{5mm}
+\textbf{Proprietà dei programmi}:
+
+\textbf{Traccia dell'esecuzione}: sequenza degli stati attraversati dal sistema di elaborazione durante l'esecuzione del programma
+
+\textbf{Stato}: insieme dei valori delle variabili definite nel programma più variabili implicite (es valore del Program Counter).
+
+\textbf{Proprietà safety}: proprietà che garantisce che durante l'esecuzioen di P non si entrerà mai in uno stato "errato".
+
+\textbf{Propietà liveness}: proprietà che garantisce che durante l'esecuzione di P, prima o pio si entrerà in uno stato "corretto".
+
+\vspace{5mm}
+\textbf{Safety and Liveness}:
+
+\textbf{Programmi sequenziali}:
+
+Le proprietà fondamentali che ogni programma sequenziale deve avere sono:
+\begin{enumerate}
+    \item \textbf{correttezza del risultato finale}: per ogni esecuzione il risultato ottenuto è giusto. (safety)
+    \item \textbf{terminazione}: prima o poi l'esecuzione termina. (liveness)
+\end{enumerate}
+
+\vspace{5mm}
+\textbf{Programmi concorrenti}:
+
+\begin{enumerate}
+    \item \textbf{correttezza del risultato finale}
+    \item \textbf{terminazione}
+    \item \textbf{mutua esclusione nell'accesso a risorse condivise}: per ogni esecuzione non accadrà mai che più di un processo acceda contemporaneamente alla stessa risorsa (safety)
+    \item \textbf{assenza di deadlock}: per ogni esecuzione non si verificheranno mai situazioni di blocco critico (safety)
+    \item \textbf{assenza di starvation}: prima o pio ogni processo potrà accedere alle risorse richieste (liveness)
+\end{enumerate}
 
 \newpage
 
@@ -948,22 +1146,22 @@ Buffer inizialmente vuoto, vu = 1, pn = 0
 
 \noindent\begin{minipage}{.45\columnwidth}
     \begin{lstlisting}
-        void invio(T dato) {
-            P(vu);
-            inserisci(dato);
-            V(pn);
-        }
+void invio(T dato) {
+    P(vu);
+    inserisci(dato);
+    V(pn);
+}
     \end{lstlisting}
 \end{minipage}\hfill
 \begin{minipage}{.45\columnwidth}
     \begin{lstlisting}
-        T ricezione() {
-            T dato;
-            P(pn);
-            dato = estrai();
-            V(vu);
-            return dato;
-        }
+T ricezione() {
+    T dato;
+    P(pn);
+    dato = estrai();
+    V(vu);
+    return dato;
+}
     \end{lstlisting}
 \end{minipage}
 
@@ -974,7 +1172,7 @@ Buffer inizialmente vuoto, vu = 1, pn = 0
 In alcuni casi l'esecuzione di un'istruzione S1 su una risorsa R è subordinata al verificarsi di una condizione C:
 
 \begin{lstlisting}
-    void op1(): region R << when(C) S1; >>
+void op1(): region R << when(C) S1; >>
 \end{lstlisting}
 
 \vspace{3mm}
@@ -1080,7 +1278,7 @@ non deve contenere variabili locali o parametri della funzione op1.
 \textbf{Semaforo condizione}
 
 \vspace{3mm}
-I semafori risorsa sono semafori generali, quindi possono assumere qualunque valore >= 0. Vengono generalmente impiegati per realizzare l'allocazione di risorse
+I semafori risorsa sono semafori generali, quindi possono assumere qualunque valore $>=$ 0. Vengono generalmente impiegati per realizzare l'allocazione di risorse
 equivalenti, nel quale il valore del semaforo rappresenta il numero di risorse libere.
 
 \vspace{3mm}
@@ -1481,7 +1679,7 @@ void Cambio_di_Contesto() {
 
 Nel nucleo di un sistema monoprocessore il semaforo può essere implementato tramite:
 \begin{itemize}
-    \item una variabile intera che rappresenta il suo valore (>=0)
+    \item una variabile intera che rappresenta il suo valore ($>=$0)
     \item un puntatore ad una lista di descrittori di processi in attesa sul semaforo (bloccati)
 \end{itemize}
 
@@ -1645,8 +1843,8 @@ separata e sufficientemente indipendente dalle altre. Ad ogni struttura dati vie
 
 Ad esempio la coda dei processi pronti, i singoli semafori, ecc, vengono protetti tramite lock distinti.
 
-Ogni operazionie del nucleo che richiederà l'accesso a una particolare struttura $$S_i$$ protetta dal locl $$L_i$$, conterrà una sezione critica
-il cui prologo ed epilogo saranno rispettivamente $$lock(L_i)$$ e $$unlock(L_i)$$.
+Ogni operazionie del nucleo che richiederà l'accesso a una particolare struttura $S_i$ protetta dal locl $L_i$, conterrà una sezione critica
+il cui prologo ed epilogo saranno rispettivamente $lock(L_i)$ e $unlock(L_i)$.
 
 \vspace{3mm}
 \textbf{Scheduling dei processi:}
@@ -1703,7 +1901,7 @@ In questo caso due operazioni P su semafori diversi:
 \end{itemize}
 
 
-\newpackage
+\newpage
 
 
 \section{Modello a scambio di messaggi}
@@ -1838,14 +2036,14 @@ Inoltre \textbf{non è necessaria l'introduzione di un buffer}: un messaggio pu�
 
 Un canale \textbf{port} identifica un canale asimmetrico \textbf{molti-a-uni}
 
-port <tipo> <identificatore>;
+port $<$tipo$>$ $<$identificatore$>$;
 
 \begin{lstlisting}
     port int ch1;
 \end{lstlisting}
 
 L'identificatore ch1 denota un canale utilizzato per trasferire messaggi di tipo intero. \textbf{Port} viene dichiarato locale ad un processo (il ricevente) ed è visibile ai
-processi mittenti mediante la dot notation -> <nome_processo>.<identificatore_canale>
+processi mittenti mediante la dot notation $\rightarrow$ $<$nome_processo$>$.$<$identificatore_canale$>$
 
 \subsubsection{Primitive di comunicazione sincrone}
 
@@ -1854,19 +2052,19 @@ processi mittenti mediante la dot notation -> <nome_processo>.<identificatore_ca
 
 \textbf{Send} è la primitica che esprime l'invio di un messaggio:
 \begin{center}
-    send(<valore>) to <porta>;
+    send($<$valore$>$) to $<$porta$>$;
 \end{center}
 
 \begin{itemize}
-    \item \textbf{<porta>}: identifica in modo univoco il canale a cui inviare il messaggio;
-    \item \textbf{<valore>}: identifica una espressione dello stesso tipo di <porta> e rappresenta il contenuto del messaggio inviato.
+    \item \textbf{$<$porta$>$}: identifica in modo univoco il canale a cui inviare il messaggio;
+    \item \textbf{$<$valore$>$}: identifica una espressione dello stesso tipo di $<$porta$>$ e rappresenta il contenuto del messaggio inviato.
 \end{itemize}
 
 \vspace{3mm}
 \textbf{Semantica}: può essere
 \begin{itemize}
-    \item \textbf{asincrona} -> canale bufferizzato;
-    \item \textbf{sincrona} -> canale a capacità nulla;
+    \item \textbf{asincrona} $\rightarrow$ canale bufferizzato;
+    \item \textbf{sincrona} $\rightarrow$ canale a capacità nulla;
 \end{itemize}
 
 A seconda della semantica e delle caratteristiche del canale la send può sospendere o meno il processo che la esegue. Ad esempio:
@@ -1880,21 +2078,21 @@ A seconda della semantica e delle caratteristiche del canale la send può sospen
 \vspace{3mm}
 
 \begin{center}
-    P = receive(<variabile>) from <porta>;
+    P = receive($<$variabile$>$) from $<$porta$>$;
 \end{center}
 
 \begin{itemize}
-    \item \textbf{<porta>}: identifica il \textbf{canale}, locale al processo ricevente, dal quale ricevere il messaggio;
-    \item \textbf{<variabile>}: è l'identificativo della variabile, dello stesso tipo di <porta>, a cui assegnare il valore del messaggio ricevuto.
+    \item \textbf{$<$porta$>$}: identifica il \textbf{canale}, locale al processo ricevente, dal quale ricevere il messaggio;
+    \item \textbf{$<$variabile$>$}: è l'identificativo della variabile, dello stesso tipo di $<$porta$>$, a cui assegnare il valore del messaggio ricevuto.
 \end{itemize}
 
 \vspace{3mm}
 \textbf{Semantica}:
 \begin{itemize}
     \item \textbf{Default: Semantica Bloccante}. La primirica sospende il processo se non ci sono messaggi sul canale; quando c'è almeno un messaggio nel canale, ne estrae il primo
-        e ne assegna a <variabile> il valore. La receive restituisce un valore del tipo predefinito \textbf{process} che identifica il nome del processo mittente.
+        e ne assegna a $<$variabile$>$ il valore. La receive restituisce un valore del tipo predefinito \textbf{process} che identifica il nome del processo mittente.
     \item Alcuni linguaggi offrono anche una semantica non bloccante: se il canale è vuoto, il processo continua; se contiene almeno un messaggio, estrae il primo e lo assegna a
-        <variabile>.
+        $<$variabile$>$.
 \end{itemize}
 
 \subsubsection{Receive Bloccante e Modello Client-Server}
@@ -2005,7 +2203,7 @@ Nel modello a scambio di messaggi, lo strumento di comunicazione di più basso l
 un diverso servizio.
 
 \vspace{3mm}
-\textit{Accesso a risorse "condivise" -> processi servitori}
+\textit{Accesso a risorse "condivise" $\rightarrow$ processi servitori}
 
 \vspace{3mm}
 
@@ -2780,18 +2978,98 @@ di perdere il token, se ad esempio il processo che detiene il token va in crash 
 
 \subsubsection{Confronto tra i 3 algoritmi di mutua esclusione}
 \begin{center}
-    \begin{tabular}{||p{6cm}|p{6cm}||}
+    \begin{tabular}{|p{3cm}|p{3cm}|p{3cm}|p{3cm}|}
         \hline
-
+        \textbf{Algoritmo} & \textbf{Num messaggi per sezione critica} & \textbf{Ritardo in entrata nella sezione critica} & \textbf{Problemi} \\
+        \hline
+        \hline
+        Centralizzato & 3 & 2 & scarsa scalabilità e crash coordinatore \\
+        \hline
+        Ricart-Agrawala & 2*(n-1) & 2*(n-1) & crash qualunque processo \\
+        \hline
+        Token Ring & 1..$\infty$ & 0..n-1 & crash qualunque processo e perdita token \\
         \hline
     \end{tabular}
-    \end{center}
+\end{center}
 
+\subsubsection{Algoritmi di Elezione}
 
+In alcuni algoritmi è previsto che un processo rivesta un ruolo speciale nella sicronizzazione tra tutti i nodi. Tale processo viene detto \textbf{coordinatore}.
+La designazione del coordinatore può essere:
+\begin{itemize}
+    \item statica: il coordinatore viene deciso in modo arbitrario dal programmatore/amministratore prima dell'esecuzione;
+    \item dinamica: il coordinatore viene designato a runtime dai processi del sistema con un \textbf{algoritmo di elezione}.
+\end{itemize}
 
+\vspace{3mm}
+Ad esempio se il coordinatore di un gruppo di processi subisce un crash, per ripristinare l'operatività del sistema, è necessario individuare a runtime un altro processo 
+del gruppo a cui attrivuire il ruolo di nuovo coordinatore.
 
+\vspace{3mm}
+\textbf{Assunzioni di base}:
+\begin{itemize}
+    \item ogni processo è identificato da un unico ID. Il dominio degli id è totalmente ordinario.
+    \item ogni processo conosce gli ID di tutti gli altri, ma non il loro stato e quindi non se sono attivi o terminati.
+\end{itemize}
 
+L'obiettivo è quello di designare vincitore il processo attivo che ha l'ID più alto.
 
+\vspace{5mm}
+\textbf{Algoritmo Bully}
+
+\vspace{3mm}
+Consideriamo un sistema composto da N processi \{P0,...,PN-1\}; sia id(Pi)=i.
+
+Quando un processo Pk rileva che il coordinatore non è più attivo, organizza un'elezione:
+\begin{enumerate}
+    \item Pk invia un messaggio "ELEZIONE" a tutti i processi con ID più alto: Pk+1,Pk+2,...,PN-1
+    \item Se nessun processo risponde, Pk vince l'elezione e diventa il nuovo coordinatore; comunica quindi a tuti gli altri processi il nuovo ruolo tramite
+    il messaggio "COORDINATORE"
+    \item Se un processo Pj (j$>$k) risponde, Pj prende il controllo e Pk rinuncia ed esce dall'elezione
+\end{enumerate}
+
+Ogni processo attivo rispomde ad ogni messaggio di ELEZIONE ricevuto.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.70\columnwidth]{imgs/bully.PNG}
+\end{figure}
+
+\vspace{5mm}
+\textbf{Algoritmo di elezione ad Anello}
+
+\vspace{3mm}
+I processi del gruppo sono collegati tramite una topologia logica ad anello. La posizione (ID) che ogni processo occupa all'interno dell'anello rappresenta
+la sua priorità.
+
+Il processo attivo con la massima priorità viene eletto \textbf{coordinatore}.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.50\columnwidth]{imgs/el_anello.PNG}
+\end{figure}
+
+Quando un qualunque processo Pi si rende conto che il coordinatore non risponde più, inizia un'elezione:
+\begin{enumerate}
+    \item Pi invia un messaggio ELEZIONE contenente il suo ID al suo successore Pi+1. Se il successore Pi+1 è in crash, il messaggio viene spedito al successore di Pi, ecc
+    \item Quando un processo Pj riceve un messaggio ELEZIONE:
+    \begin{itemize}
+        \item se il messaggio non contiene l'ID di Pj, aggiunge il suo ID al messaggio e lo spedisce al successivo, ecc
+        \item se il messaggio contiene l'ID di Pj, significa che è stato compiuto un giro completo dell'anello: Pj designa come coordinatore il processo corrispondente
+        all'ID più alto nel messaggio ricevuto e invia al successivo processo un messaggio COORDINATOR contenente l'ID del processo designato come nuovo coordinartore
+    \end{itemize}
+    \item Quando un processo riceve un messaggio COORDINATOR, ne prende atto e inoltra lo stesso messaggio al successivo.
+\end{enumerate}
+
+\vspace{3mm}
+\textbf{Esempio}
+
+P3 e P6 avviano entrambi un'elezione: entrambe le elezioni designeranno P6 come nuovo coordinatore. Ogni messaggio COORDINATOR dopo aver percorso l'anello verrà eliminato.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.90\columnwidth]{imgs/anello_es.PNG}
+\end{figure}
 
 
 
