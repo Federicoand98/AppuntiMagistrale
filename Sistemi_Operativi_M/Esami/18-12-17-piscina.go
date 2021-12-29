@@ -11,7 +11,7 @@ import (
 /////////////////////////////////////////////////////////////////////
 const MAXBUFF = 100
 const MAXPROC = 10
-const MAX = 5 // capacità
+const MAX = 15 // capacità
 const ORDINARI = 0
 const STUDENTI = 1
 const ORDINARI_ABB = 2
@@ -36,7 +36,7 @@ var richiesta_uscita [4]chan Richiesta
 /////////////////////////////////////////////////////////////////////
 //GORoutine join
 /////////////////////////////////////////////////////////////////////
-var done = make(chan bool)
+var done chan bool
 var termina = make(chan bool)
 
 /////////////////////////////////////////////////////////////////////
@@ -118,48 +118,85 @@ func Piscina() {
 
 	for {
 		select {
-		case richiesta := <-when():
-
+		case richiesta := <-when(ordinari+studenti < MAX && (studenti <= ordinari || len(richiesta_ingresso[ORDINARI]) == 0 && len(richiesta_ingresso[ORDINARI_ABB]) == 0), richiesta_ingresso[STUDENTI_ABB]):
+			studenti++
+			richiesta.ack <- 1
+			fmt.Println("[Piscina]: ingresso studente con abbonamento ", richiesta.ID, ". Num studenti: ", studenti, " Num ordinari: ", ordinari)
+		case richiesta := <-when(ordinari+studenti < MAX && ((studenti <= ordinari && len(richiesta_ingresso[STUDENTI_ABB]) == 0) || len(richiesta_ingresso[ORDINARI]) == 0 && len(richiesta_ingresso[ORDINARI_ABB]) == 0 && len(richiesta_ingresso[STUDENTI_ABB]) == 0), richiesta_ingresso[STUDENTI]):
+			studenti++
+			richiesta.ack <- 1
+			fmt.Println("[Piscina]: ingresso studente ", richiesta.ID, ". Num studenti: ", studenti, " Num ordinari: ", ordinari)
+		case richiesta := <-when(ordinari+studenti < MAX && (ordinari < studenti || len(richiesta_ingresso[STUDENTI_ABB]) == 0 && len(richiesta_ingresso[STUDENTI]) == 0), richiesta_ingresso[ORDINARI_ABB]):
+			ordinari++
+			richiesta.ack <- 1
+			fmt.Println("[Piscina]: ingresso ordinario con abbonamento ", richiesta.ID, ". Num studenti: ", studenti, " Num ordinari: ", ordinari)
+		case richiesta := <-when(ordinari+studenti < MAX && ((ordinari < studenti && len(richiesta_ingresso[ORDINARI_ABB]) == 0) || len(richiesta_ingresso[STUDENTI]) == 0 && len(richiesta_ingresso[STUDENTI_ABB]) == 0 && len(richiesta_ingresso[ORDINARI_ABB]) == 0), richiesta_ingresso[ORDINARI]):
+			ordinari++
+			richiesta.ack <- 1
+			fmt.Println("[Piscina]: ingresso ordinario ", richiesta.ID, ". Num studenti: ", studenti, " Num ordinari: ", ordinari)
+		case richiesta := <-richiesta_uscita[STUDENTI_ABB]:
+			studenti--
+			richiesta.ack <- 1
+			fmt.Println("[Piscina]: uscita studente con abbonamento ", richiesta.ID, ". Num studenti: ", studenti, " Num ordinari: ", ordinari)
+		case richiesta := <-richiesta_uscita[STUDENTI]:
+			studenti--
+			richiesta.ack <- 1
+			fmt.Println("[Piscina]: uscita studente ", richiesta.ID, ". Num studenti: ", studenti, " Num ordinari: ", ordinari)
+		case richiesta := <-richiesta_uscita[ORDINARI_ABB]:
+			ordinari--
+			richiesta.ack <- 1
+			fmt.Println("[Piscina]: uscita ordinario con abbonamento ", richiesta.ID, ". Num studenti: ", studenti, " Num ordinari: ", ordinari)
+		case richiesta := <-richiesta_uscita[ORDINARI]:
+			ordinari--
+			richiesta.ack <- 1
+			fmt.Println("[Piscina]: uscita ordinario ", richiesta.ID, ". Num studenti: ", studenti, " Num ordinari: ", ordinari)
+		case <-termina:
+			done <- true
+			return
 		}
 	}
-
 }
 
 /////////////////////////////////////////////////////////////////////
 //Test main
 /////////////////////////////////////////////////////////////////////
 func main() {
-	var V1 int
-	var V2 int
+	rand.Seed(time.Now().UTC().UnixNano())
 
-	fmt.Printf("\nQuanti Thread tipo1 (max %d)? ", MAXPROC)
-	fmt.Scanf("%d", &V1)
-	fmt.Printf("\nQuanti Thread tipo2 (max %d)? ", MAXPROC)
-	fmt.Scanf("%d", &V2)
+	done = make(chan bool, MAX)
 
-	//inizializzazione canali per le auto a nord e a sud
-	for i := 0; i < V1; i++ {
-		ACK_T1[i] = make(chan int, MAXBUFF)
-	}
-	for i := 0; i < V2; i++ {
-		ACK_T2[i] = make(chan int, MAXBUFF)
+	for i := 0; i < 4; i++ {
+		richiesta_ingresso[i] = make(chan Richiesta, MAXBUFF)
+		richiesta_uscita[i] = make(chan Richiesta, MAXBUFF)
 	}
 
-	rand.Seed(time.Now().Unix())
-	go server()
-
-	for i := 0; i < T1; i++ {
-		go goroutine(i, 1)
-	}
-	for i := 0; i < T2; i++ {
-		go goroutine(i, 0)
+	for i := 0; i < 4; i++ {
+		go Utente(i, ORDINARI)
 	}
 
-	for i := 0; i < V1+V2; i++ {
+	for i := 4; i < 8; i++ {
+		go Utente(i, STUDENTI)
+	}
+
+	for i := 8; i < 12; i++ {
+		go Utente(i, ORDINARI_ABB)
+	}
+
+	for i := 12; i < 16; i++ {
+		go Utente(i, STUDENTI_ABB)
+	}
+
+	go Biglietteria()
+	go Piscina()
+
+	for i := 0; i < 16; i++ {
 		<-done
 	}
 
+	fmt.Println("terminate")
 	termina <- true
 	<-done
-	fmt.Printf("\nHO FINITO!!! ^_- \n")
+	termina <- true
+	<-done
+	fmt.Println("FINITO")
 }
