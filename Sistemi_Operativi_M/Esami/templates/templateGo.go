@@ -38,11 +38,24 @@ var termina = make(chan bool)
 // Funzioni Ausiliarie
 /////////////////////////////////////////////////////////////////////
 // se si usa struttura dati modificare la when
-func when(b bool, c chan int) chan int {
+func when(b bool, c chan Richiesta) chan Richiesta {
 	if !b {
 		return nil
 	}
 	return c
+}
+
+func whenInt(b bool, c chan int) chan int {
+	if !b {
+		return nil
+	}
+	return c
+}
+
+func sleepRandTime(timeLimit int) {
+	if timeLimit > 0 {
+		time.Sleep(time.Duration(rand.Intn(timeLimit)+1) * time.Second)
+	}
 }
 
 /////////////////////////////////////////////////////////////////////
