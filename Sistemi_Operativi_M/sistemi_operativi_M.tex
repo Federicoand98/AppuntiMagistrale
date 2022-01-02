@@ -156,7 +156,7 @@ Sorgono però due problemi:
 
 \subsubsection{Ring Deprivileging}
 Con Ring Deprivilenging si indica una situazione nel quale l'esecuzione di istruzioni privilegiate richieste dal sistema operativo nell'ambiente guest non
-possono essere eseguite in quanto richiederebbero un ring 0, ma il kernel della macchina virtuale esegue in un ring di livello superiore (foto telefono 1)
+possono essere eseguite in quanto richiederebbero un ring 0, ma il kernel della macchina virtuale esegue in un ring di livello superiore.
 
 Una possibile prima soluzione è il \textbf{Trap \& Emulate}: nel quale se il guest tenta di eseguire un'istruzione privilegiata
 
@@ -185,9 +185,7 @@ Se la CPU è naturalmente virtualizzabile viene implementato il trap\&emulate, a
 \subsubsection{Fast Binary Translation}
 Il VMM scansiona dinamicamente il codice dei sistemi operativi guest prima dell'esecuzione per sostituire a run time i blocchi contenenti istuzioni privilegiate
 in blocchi equivalenti dal punto di vista funzionale e contenenti chiamate al VMM. Inoltre i blocchi tradotti sono eseguiti e conservati in cache per eventuali
-riusi futuri. (SISTEMARE)
-
-(immagine slide 33)
+riusi futuri.
 
 Il principale limite della Fast Binary Translation è che la traduzione dinamica è molto costosa. Però, con questa tecnica, ogni macchina virtuale è una esatta
 copia della macchina fisica, con la possiblità di installare gli stessi s.o. di architetture non virtualizzate.

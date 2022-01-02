@@ -62,8 +62,6 @@ func sleepRandTime(timeLimit int) {
 // Goroutine
 /////////////////////////////////////////////////////////////////////
 func goroutine(id int, tipo int) {
-	//time.Sleep(time.Duration(rand.Intn(5) + 1) * time.Second)
-
 	richiesta := Richiesta{id, make(chan int)} // se si usa struttura
 
 	// do things
