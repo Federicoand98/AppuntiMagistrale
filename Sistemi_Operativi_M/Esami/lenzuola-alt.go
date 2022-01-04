@@ -21,16 +21,19 @@ const MAX_S = 100
 /////////////////////////////////////////////////////////////////////
 type Richiesta struct {
 	id  int
+	qty int
 	ack chan int
 }
 
 /////////////////////////////////////////////////////////////////////
 // Canali
 /////////////////////////////////////////////////////////////////////
-var consegna_OO = make(chan Richiesta, MAXBUFF)
+var consegna_OO_under = make(chan Richiesta, MAXBUFF)
+var consegna_OO_over = make(chan Richiesta, MAXBUFF)
 var ritira_OO = make(chan Richiesta, MAXBUFF)
 var ritira_AL = make(chan Richiesta, MAXBUFF)
-var deposita_AL = make(chan Richiesta, MAXBUFF)
+var deposita_AL_under = make(chan Richiesta, MAXBUFF)
+var deposita_AL_over = make(chan Richiesta, MAXBUFF)
 
 /////////////////////////////////////////////////////////////////////
 // Join Goroutine
@@ -65,70 +68,89 @@ func sleepRandTime(timeLimit int) {
 /////////////////////////////////////////////////////////////////////
 // Goroutine
 /////////////////////////////////////////////////////////////////////
+
 func operatore(id int) {
 	fmt.Printf("[Operatore %d]: avviato\n", id)
 
-	richiesta := Richiesta{id: id, ack: make(chan int)}
+	richiesta := Richiesta{id: id, qty: rand.Intn(MAX_S), ack: make(chan int)}
+	var ok bool = true
 
-	consegna_OO <- richiesta
-	<-richiesta.ack
+	for ok {
+		if richiesta.qty < MAX_S/2 {
+			consegna_OO_under <- richiesta
+		} else {
+			consegna_OO_over <- richiesta
+		}
 
-	fmt.Printf("[Operatore %d]: consegnate %d lenzuola sporche.\n", id, N)
+		ris := <-richiesta.ack
 
-	sleepRandTime(5)
-
-	ritira_OO <- richiesta
-	<-richiesta.ack
-
-	fmt.Printf("[Operatore %d]: ritirate %d lenzuola pulite\n", id, N)
-
-	done <- true
-}
-
-// alternativa -> il testo dell'esame è poco chiaro
-/*
-func operatore(id int) {
-	fmt.Printf("[Operatore %d]: avviato\n", id)
-
-	richiesta := Richiesta{id: id, qty: rand.Intn(100), ack: make(chan int)}
-
-	if richiesta.qty < MAX_S/2 {
-		consegna_OO_under <- richiesta
-	} else {
-		consegna_OO_over <- richiesta
+		if ris == 1 {
+			fmt.Printf("[Operatore %d]: consegnate %d lenzuola sporche.\n", id, richiesta.qty)
+			ok = false
+		} else {
+			fmt.Printf("[Operatore %d]: non sono riuscito a consegnare %d lenzuola sporche. Riprovo fra poco.\n", id, richiesta.qty)
+			sleepRandTime(8)
+		}
 	}
 
-	<-richiesta.ack
-
-	fmt.Printf("[Operatore %d]: consegnate %d lenzuola sporche.\n", id, richiesta.qty)
-
 	sleepRandTime(5)
+	ok = true
 
-	ritira_OO <- richiesta
-	<-richiesta.ack
+	for ok {
+		ritira_OO <- richiesta
+		ris := <-richiesta.ack
 
-	fmt.Printf("[Operatore %d]: ritirate %d lenzuola pulite\n", id, N)
+		if ris == 1 {
+			fmt.Printf("[Operatore %d]: ritirate %d lenzuola pulite\n", id, richiesta.qty)
+			ok = false
+		} else {
+			fmt.Printf("[Operatore %d]: non sono riuscito a ritirare %d lenzuola pulite. Riprovo fra poco.\n", id, richiesta.qty)
+			sleepRandTime(8)
+		}
+	}
 
 	done <- true
 }
-*/
 
 func addetto(id int) {
 	fmt.Printf("[Addetto %d]: avviato\n", id)
 
-	richiesta := Richiesta{id: id, ack: make(chan int)}
+	richiesta := Richiesta{id: id, qty: rand.Intn(MAX_P), ack: make(chan int)}
+	var ok bool = true
 
-	ritira_AL <- richiesta
-	<-richiesta.ack
+	for ok {
+		ritira_AL <- richiesta
+		ris := <-richiesta.ack
 
-	fmt.Printf("[Addetto %d]: ritirate %d lenzuola sporche.\n", id, M)
+		if ris == 1 {
+			fmt.Printf("[Addetto %d]: ritirate %d lenzuola sporche.\n", id, richiesta.qty)
+			ok = false
+		} else {
+			fmt.Printf("[Addetto %d]: non sono riuscito a ritirare %d lenzuola sporche. Riprovo fra poco.\n", id, richiesta.qty)
+			sleepRandTime(8)
+		}
+	}
 
-	sleepRandTime(7)
+	sleepRandTime(5)
+	ok = true
 
-	deposita_AL <- richiesta
-	<-richiesta.ack
+	for ok {
+		if richiesta.qty < MAX_P/2 {
+			deposita_AL_under <- richiesta
+		} else {
+			deposita_AL_over <- richiesta
+		}
 
-	fmt.Printf("[Addetto %d]: depositate %d lenzuola pulite.\n", id, M)
+		ris := <-richiesta.ack
+
+		if ris == 1 {
+			fmt.Printf("[Addetto %d]: depositate %d lenzuola pulite.\n", id, richiesta.qty)
+			ok = false
+		} else {
+			fmt.Printf("[Addetto %d]: non sono riuscito a depositare %d lenzuola sporche. Riprovo fra poco.\n", id, richiesta.qty)
+			sleepRandTime(8)
+		}
+	}
 
 	done <- true
 }
@@ -136,27 +158,71 @@ func addetto(id int) {
 func deposito() {
 	fmt.Printf("[Deposito]: avviato\n")
 
-	var num_s int = 0
-	var num_p int = 0
+	var num_s int = 70
+	var num_p int = 40
 
 	for {
 		select {
-		case richiesta := <-when((num_s+N < MAX_S) && (num_p > num_s || (len(deposita_AL) == 0 && len(ritira_AL) == 0)), consegna_OO):
-			num_s += N
-			richiesta.ack <- 1
-			fmt.Printf("[Deposito]: depositate da OO %d sporche. Num_s: %d. Num_p: %d.\n", N, num_s, num_p)
-		case richiesta := <-when((num_p >= N) && (num_p > num_s || (len(ritira_AL) == 0 && len(deposita_AL) == 0)), ritira_OO):
-			num_p -= N
-			richiesta.ack <- 1
-			fmt.Printf("[Deposito]: ritirate da OO %d pulite. Num_s: %d. Num_p: %d.\n", N, num_s, num_p)
-		case richiesta := <-when((num_p+M < MAX_P) && (num_s > num_p || (len(consegna_OO) == 0 && len(ritira_OO) == 0)), deposita_AL):
-			num_p += M
-			richiesta.ack <- 1
-			fmt.Printf("[Deposito]: depositate da AL %d pulite. Num_s: %d. Num_p: %d.\n", M, num_s, num_p)
-		case richiesta := <-when((num_s >= M) && (num_s > num_p || (len(consegna_OO) == 0 && len(ritira_OO) == 0)), ritira_AL):
-			num_s -= M
-			richiesta.ack <- 1
-			fmt.Printf("[Deposito]: ritirate da AL %d sporche. Num_s: %d. Num_p: %d.\n", M, num_s, num_p)
+		case richiesta := <-when((num_p > num_s || (len(deposita_AL_over) == 0 && len(deposita_AL_under) == 0 && len(ritira_AL) == 0)), consegna_OO_under):
+			if num_s+richiesta.qty <= MAX_S {
+				num_s += richiesta.qty
+				richiesta.ack <- 1
+				fmt.Printf("[Deposito]: depositate da OO %d sporche. Num_s: %d. Num_p: %d.\n", richiesta.qty, num_s, num_p)
+			} else {
+				richiesta.ack <- 0
+				fmt.Printf("[Deposito]: impossibile depositare da OO %d sporche. Num_s: %d. Num_p: %d.\n", N, num_s, num_p)
+			}
+
+		case richiesta := <-when((num_p > num_s || (len(consegna_OO_under) == 0 && len(deposita_AL_over) == 0 && len(deposita_AL_under) == 0 && len(ritira_AL) == 0)), consegna_OO_over):
+			if num_s+richiesta.qty <= MAX_S {
+				num_s += richiesta.qty
+				richiesta.ack <- 1
+				fmt.Printf("[Deposito]: depositate da OO %d sporche. Num_s: %d. Num_p: %d.\n", richiesta.qty, num_s, num_p)
+			} else {
+				richiesta.ack <- 0
+				fmt.Printf("[Deposito]: impossibile depositare da OO %d sporche. Num_s: %d. Num_p: %d.\n", N, num_s, num_p)
+			}
+
+		case richiesta := <-when((num_p > num_s || (len(ritira_AL) == 0 && len(deposita_AL_over) == 0 && len(deposita_AL_under) == 0)), ritira_OO):
+			if num_p >= richiesta.qty {
+				num_p -= richiesta.qty
+				richiesta.ack <- 1
+				fmt.Printf("[Deposito]: ritirate da OO %d pulite. Num_s: %d. Num_p: %d.\n", richiesta.qty, num_s, num_p)
+			} else {
+				richiesta.ack <- 0
+				fmt.Printf("[Deposito]: impossibile ritirare da OO %d pulite. Num_s: %d. Num_p: %d.\n", richiesta.qty, num_s, num_p)
+			}
+
+		case richiesta := <-when((num_s > num_p || (len(consegna_OO_over) == 0 && len(consegna_OO_under) == 0 && len(ritira_OO) == 0)), deposita_AL_under):
+			if num_p+richiesta.qty <= MAX_P {
+				num_p += richiesta.qty
+				richiesta.ack <- 1
+				fmt.Printf("[Deposito]: depositate da AL %d pulite. Num_s: %d. Num_p: %d.\n", richiesta.qty, num_s, num_p)
+			} else {
+				richiesta.ack <- 0
+				fmt.Printf("[Deposito]: impossibile depositare da AL %d pulite. Num_s: %d. Num_p: %d.\n", richiesta.qty, num_s, num_p)
+			}
+
+		case richiesta := <-when((num_s > num_p || (len(deposita_AL_under) == 0 && len(consegna_OO_over) == 0 && len(consegna_OO_under) == 0 && len(ritira_OO) == 0)), deposita_AL_over):
+			if num_p+richiesta.qty <= MAX_P {
+				num_p += richiesta.qty
+				richiesta.ack <- 1
+				fmt.Printf("[Deposito]: depositate da AL %d pulite. Num_s: %d. Num_p: %d.\n", richiesta.qty, num_s, num_p)
+			} else {
+				richiesta.ack <- 0
+				fmt.Printf("[Deposito]: impossibile depositare da AL %d pulite. Num_s: %d. Num_p: %d.\n", richiesta.qty, num_s, num_p)
+			}
+
+		case richiesta := <-when((num_s > num_p || (len(consegna_OO_over) == 0 && len(consegna_OO_under) == 0 && len(ritira_OO) == 0)), ritira_AL):
+			if num_s >= richiesta.qty {
+				num_s -= richiesta.qty
+				richiesta.ack <- 1
+				fmt.Printf("[Deposito]: ritirate da AL %d sporche. Num_s: %d. Num_p: %d.\n", richiesta.qty, num_s, num_p)
+			} else {
+				richiesta.ack <- 0
+				fmt.Printf("[Deposito]: impossibile ritirare da AL %d sporche. Num_s: %d. Num_p: %d.\n", richiesta.qty, num_s, num_p)
+			}
+
 		case <-termina:
 			fmt.Println("\n[Deposito]: Fine!")
 			done <- true
