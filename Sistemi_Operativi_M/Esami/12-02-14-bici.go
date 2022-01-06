@@ -12,6 +12,11 @@ import (
 const MAXBUFF = 100
 const MAXPROC = 10
 const MAX = 5 // capacità
+const UOMO = 0
+const DONNA = 1
+const BAMBINO = 2
+const NUOVI = 0
+const ESPERTI = 1
 
 /////////////////////////////////////////////////////////////////////
 // Strutture Dati
@@ -56,10 +61,6 @@ func sleepRandTime(timeLimit int) {
 	if timeLimit > 0 {
 		time.Sleep(time.Duration(rand.Intn(timeLimit)+1) * time.Second)
 	}
-}
-
-func remove(slice []int, s int) []int {
-    return append(slice[:s], slice[s+1:]...)
 }
 
 /////////////////////////////////////////////////////////////////////
