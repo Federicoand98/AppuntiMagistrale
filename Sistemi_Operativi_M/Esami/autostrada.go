@@ -83,7 +83,7 @@ func goroutine(id int, tipo int) {
 	var ris int
 
 	if tipo == NS {
-		fmt.Printf("[Auto %s]: avviata auto N->S\n", id)
+		fmt.Printf("[Auto %d]: avviata auto N->S\n", id)
 
 		entrata_NS <- richiesta
 		ris = <-richiesta.ack
@@ -95,7 +95,7 @@ func goroutine(id int, tipo int) {
 		ris = <-richiesta.ack
 		fmt.Printf("[Aurto %d]: uscita dalla corsia %s, ha percorso la direzione N->S\n", id, corsia[ris])
 	} else if tipo == SN {
-		fmt.Printf("[Auto %s]: avviata auto N->S\n", id)
+		fmt.Printf("[Auto %d]: avviata auto N->S\n", id)
 
 		entrata_SN <- richiesta
 		ris = <-richiesta.ack
