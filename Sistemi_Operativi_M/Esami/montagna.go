@@ -16,8 +16,6 @@ const A = 0
 const B = 1
 const T1 = 0
 const T2 = 1
-const TURISTA = 0
-const ALPINO = 1
 
 /////////////////////////////////////////////////////////////////////
 // Strutture Dati
