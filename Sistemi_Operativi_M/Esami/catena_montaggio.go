@@ -77,6 +77,7 @@ func remove(slice []int, s int) []int {
 /////////////////////////////////////////////////////////////////////
 func nastro(tipo int) {
 	richiesta := Richiesta{0, make(chan int)} // se si usa struttura
+	fmt.Printf("[Nastro %s]: avviato\n", tipoNastro[tipo])
 
 	for {
 		deposito[PA] <- richiesta
@@ -96,6 +97,7 @@ func nastro(tipo int) {
 
 func robot(tipo int) {
 	richiesta := Richiesta{0, make(chan int)}
+	fmt.Printf("[Robot %s]: avviato\n", tipoRobot[tipo])
 	var ris int
 
 	for {
@@ -161,19 +163,19 @@ func Deposito() {
 
 	for {
 		select {
-		case richiesta := <-when(!fine && num_ca+num_cb < MAX_C && (montate_a < montate_b || (montate_b <= montate_a && len(deposito[CB]) == 0)), deposito[CA]):
+		case richiesta := <-when(!fine && num_ca+num_cb < MAX_C && (montate_a < montate_b || (montate_a >= montate_b && len(deposito[CB]) == 0)), deposito[CA]):
 			num_ca++
 			richiesta.ack <- 1
 			fmt.Printf("[Deposito]: depositato CA. NumCA: %d, NumCB: %d, NumPA: %d, NumPB: %d, NumMontateA: %d, NumMontateB: %d\n", num_ca, num_cb, num_pa, num_pb, montate_a, montate_b)
-		case richiesta := <-when(!fine && num_ca+num_cb < MAX_C && (montate_b < montate_a || (montate_a <= montate_b && len(deposito[CA]) == 0)), deposito[CB]):
+		case richiesta := <-when(!fine && num_ca+num_cb < MAX_C && (montate_b < montate_a || (montate_b >= montate_a && len(deposito[CA]) == 0)), deposito[CB]):
 			num_cb++
 			richiesta.ack <- 1
 			fmt.Printf("[Deposito]: depositato CB. NumCA: %d, NumCB: %d, NumPA: %d, NumPB: %d, NumMontateA: %d, NumMontateB: %d\n", num_ca, num_cb, num_pa, num_pb, montate_a, montate_b)
-		case richiesta := <-when(!fine && num_pa+num_pb < MAX_P && (montate_a < montate_b || (montate_b <= montate_a && len(deposito[PB]) == 0)), deposito[PA]):
+		case richiesta := <-when(!fine && num_pa+num_pb < MAX_P && (montate_a < montate_b || (montate_a >= montate_b && len(deposito[PB]) == 0)), deposito[PA]):
 			num_pa++
 			richiesta.ack <- 1
 			fmt.Printf("[Deposito]: depositato PA. NumCA: %d, NumCB: %d, NumPA: %d, NumPB: %d, NumMontateA: %d, NumMontateB: %d\n", num_ca, num_cb, num_pa, num_pb, montate_a, montate_b)
-		case richiesta := <-when(!fine && num_pa+num_pb < MAX_P && (montate_b < montate_a || (montate_a <= montate_b && len(deposito[PA]) == 0)), deposito[PB]):
+		case richiesta := <-when(!fine && num_pa+num_pb < MAX_P && (montate_b < montate_a || (montate_b >= montate_a && len(deposito[PA]) == 0)), deposito[PB]):
 			num_pb++
 			richiesta.ack <- 1
 			fmt.Printf("[Deposito]: depositato PB. NumCA: %d, NumCB: %d, NumPA: %d, NumPB: %d, NumMontateA: %d, NumMontateB: %d\n", num_ca, num_cb, num_pa, num_pb, montate_a, montate_b)
