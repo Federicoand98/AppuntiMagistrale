@@ -11,7 +11,7 @@ import (
 /////////////////////////////////////////////////////////////////////
 const MAXBUFF = 100
 const MAXPROC = 10
-const MAX = 15
+const MAX = 50
 
 /////////////////////////////////////////////////////////////////////
 // Strutture Dati
@@ -45,6 +45,13 @@ var termina = make(chan bool)
 /////////////////////////////////////////////////////////////////////
 // se si usa struttura dati modificare la when
 func when(b bool, c chan Richiesta) chan Richiesta {
+	if !b {
+		return nil
+	}
+	return c
+}
+
+func whenT(b bool, c chan Ticket) chan Ticket {
 	if !b {
 		return nil
 	}
@@ -125,19 +132,54 @@ func cliente(id int) {
 
 func gestore() {
 	var num int = 0
+	var prenotati int = 0
 	var fine bool = false
+	var fine_deposito bool = false
+	var trovato bool = false
 	var ticket = make([]int, MAXBUFF)
+	var i int = 0
 
 	for {
 		select {
 		case richiesta := <-when(!fine && num < MAX && len(prenota) == 0 && len(ritira) == 0, deposita):
 			num++
 			richiesta.ack <- 1
-			fmt.Printf("[Gestore]: depositati tortellini. Num: %d\n", num)
+			if num == MAX {
+				fine_deposito = true
+			}
+			fmt.Printf("[Gestore]: depositati tortellini. NumPronti: %d, NumPrenotati: %d\n", num, prenotati)
 		case richiesta := <-when(!fine, prenota):
+			if prenotati == MAX {
+				richiesta.ack <- -1
+				fmt.Printf("[Gestore]: impossibile prenotare altri tortellini. NumPronti: %d, NumPrenotati: %d\n", num, prenotati)
+			} else {
+				prenotati++
+				ticket[i] = richiesta.id
+				i++
+				richiesta.ack <- richiesta.id
+				fmt.Printf("[Gestore]: tortellini prenotati. NumPronti: %d, NumPrenotati: %d\n", num, prenotati)
+			}
+		case richiesta := <-whenT(!fine && prenotati > 0 && num > 0 && len(prenota) == 0, ritira):
+			var j int = 0
+			for j = 0; j < i && !trovato; j++ {
+				if ticket[j] == richiesta.ticket {
+					trovato = true
+				}
+			}
 
-		case richiesta := <-when(!fine && num > 0 && len(prenota) == 0, ritira):
+			if trovato {
+				num--
+				richiesta.ack <- 1
+				fmt.Printf("[Gestore]: tortellini ritirati. NumPronti: %d, NumPrenotati: %d\n", num, prenotati)
+			} else {
+				richiesta.ack <- -1
+				fmt.Printf("[Gestore]: impossibile ritirare tortellini tortellini. NumPronti: %d, NumPrenotati: %d\n", num, prenotati)
+			}
 
+			if fine_deposito && num == 0 {
+				fine = true
+				fmt.Printf("[Gestore]: finiti i ritiri\n")
+			}
 		case richiesta := <-when(fine, deposita):
 			richiesta.ack <- -1
 			fmt.Printf("[Gestore]: termino\n")
@@ -155,27 +197,21 @@ func gestore() {
 func main() {
 	rand.Seed(time.Now().Unix())
 
-	var V1 int
-	var V2 int
+	var S int = 5
+	var C int = 50
 
-	fmt.Printf("\nQuanti Thread tipo1 (max %d)? ", MAXPROC)
-	fmt.Scanf("%d", &V1)
-	fmt.Printf("\nQuanti Thread tipo2 (max %d)? ", MAXPROC)
-	fmt.Scanf("%d", &V2)
+	go gestore()
 
-	//inizializzazione canali se non si usa struttura dati
-	for i := 0; i < V1; i++ {
-		ACK[i] = make(chan int, MAXBUFF)
+	for i := 0; i < S; i++ {
+		go spoglina(i)
 	}
 
-	go server()
-
-	for i := 0; i < T1; i++ {
-		go goroutine(i, 1)
+	for i := 0; i < C; i++ {
+		go cliente(i)
 	}
 
 	// join
-	for i := 0; i < V1+V2; i++ {
+	for i := 0; i < S+C; i++ {
 		<-done
 	}
 
