@@ -86,14 +86,14 @@ func spoglina(id int) {
 		ris := <-richiesta.ack
 
 		if ris == -1 {
-			fmt.Printf("[Spoglina]: termino\n")
+			fmt.Printf("[Spoglina %d]: termino\n", id)
 			done <- true
 			return
 		}
 
-		fmt.Printf("[Spoglina]: tortellini depositati\n")
+		fmt.Printf("[Spoglina %d]: tortellini depositati\n", id)
 
-		sleepRandTime(5)
+		sleepRandTime(3)
 	}
 }
 
@@ -116,7 +116,7 @@ func cliente(id int) {
 	ticket := Ticket{id, codice, make(chan int)}
 
 	ritira <- ticket
-	ris := <-richiesta.ack
+	ris := <-ticket.ack
 
 	if ris == -1 {
 		fmt.Printf("[Cliente %d]: impossibile ritirare, il ticket %d non è valido, termino\n", id, ticket.ticket)
@@ -141,25 +141,28 @@ func gestore() {
 
 	for {
 		select {
-		case richiesta := <-when(!fine && num < MAX && len(prenota) == 0 && len(ritira) == 0, deposita):
-			num++
-			richiesta.ack <- 1
+		case richiesta := <-when(!fine && num <= MAX && len(prenota) == 0 && len(ritira) == 0, deposita):
 			if num == MAX {
 				fine_deposito = true
+				richiesta.ack <- -1
+			} else {
+				num++
+				richiesta.ack <- 1
+				fmt.Printf("[Gestore]: depositati tortellini. NumPronti: %d, NumPrenotati: %d\n", num, prenotati)
 			}
-			fmt.Printf("[Gestore]: depositati tortellini. NumPronti: %d, NumPrenotati: %d\n", num, prenotati)
 		case richiesta := <-when(!fine, prenota):
-			if prenotati == MAX {
+			prenotati++
+			if prenotati >= MAX {
 				richiesta.ack <- -1
 				fmt.Printf("[Gestore]: impossibile prenotare altri tortellini. NumPronti: %d, NumPrenotati: %d\n", num, prenotati)
 			} else {
-				prenotati++
 				ticket[i] = richiesta.id
 				i++
 				richiesta.ack <- richiesta.id
 				fmt.Printf("[Gestore]: tortellini prenotati. NumPronti: %d, NumPrenotati: %d\n", num, prenotati)
 			}
 		case richiesta := <-whenT(!fine && prenotati > 0 && num > 0 && len(prenota) == 0, ritira):
+			fmt.Printf("[Gestore]: ritira\n")
 			var j int = 0
 			for j = 0; j < i && !trovato; j++ {
 				if ticket[j] == richiesta.ticket {
@@ -180,9 +183,8 @@ func gestore() {
 				fine = true
 				fmt.Printf("[Gestore]: finiti i ritiri\n")
 			}
-		case richiesta := <-when(fine, deposita):
-			richiesta.ack <- -1
-			fmt.Printf("[Gestore]: termino\n")
+
+			trovato = false
 		case <-termina:
 			fmt.Println("\n\n[SERVER]: Fine!")
 			done <- true
@@ -197,8 +199,8 @@ func gestore() {
 func main() {
 	rand.Seed(time.Now().Unix())
 
-	var S int = 5
-	var C int = 50
+	var S int = 10
+	var C int = 45
 
 	go gestore()
 
