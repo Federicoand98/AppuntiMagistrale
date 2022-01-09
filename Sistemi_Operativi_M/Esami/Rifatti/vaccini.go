@@ -139,8 +139,6 @@ func regione(tipo int) {
 
 		sleepRandTime(5)
 	}
-
-	done <- true
 }
 
 func deposito() {
@@ -259,6 +257,15 @@ func main() {
 	rand.Seed(time.Now().Unix())
 
 	var V1 int = 20
+
+	for i := 0; i < 3; i++ {
+		prelievo[i] = make(chan Richiesta, MAXBUFF)
+	}
+
+	for i := 0; i < 2; i++ {
+		prenota[i] = make(chan Richiesta, MAXBUFF)
+		deposita[i] = make(chan Richiesta, MAXBUFF)
+	}
 
 	go deposito()
 
