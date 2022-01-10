@@ -180,6 +180,16 @@ func gestore() {
 func main() {
 	rand.Seed(time.Now().Unix())
 
+	for i := 0; i < 3; i++ {
+		ingresso_clienti[i] = make(chan Richiesta, MAXBUFF)
+		uscita_clienti[i] = make(chan Richiesta, MAXBUFF)
+	}
+
+	for i := 0; i < 2; i++ {
+		ingresso_operatori[i] = make(chan Richiesta, MAXBUFF)
+		uscita_operatori[i] = make(chan Richiesta, MAXBUFF)
+	}
+
 	for i := 0; i < 20; i++ {
 		go cliente(i, rand.Intn(2))
 	}
