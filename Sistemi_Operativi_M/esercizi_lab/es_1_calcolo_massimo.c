@@ -10,6 +10,7 @@
 
 int vector[N];
 
+
 void *Calcolo(void *t) {
     long tid;
     int max = 0;
