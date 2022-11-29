@@ -1,0 +1,24 @@
+2014 Living Costs and Food Survey - United kingdom
+
+name	Variable label
+	
+hhsize		Household size
+quarter		Sample quarter
+adults_n	Number of adults
+children_n	Number of children
+totalexp	Total weekly household expenditure (GBP)
+SexHRP		Sex of Household Reference Person
+month		Sampling month
+Gorx		Government Office Region modified
+Year		Survey Year
+income		Total weekly income (GBP)
+AgeHRP		Age of HRP - anonymised
+qmeat		Monthly purchases of meat (Kg)
+qfish		Monthly purchases of fish (Kg)
+qfv		Monthly purchases of fruit & vegetables (Kg)
+xmeat		Monthly expenditure in meat (GBP)
+xfish		Monthly expenditure in fish (GBP)
+xfv		Monthly expenditure in fruit & vegetables (GBP)
+uvmeat		Unit value for meat (GBP/Kg)
+uvfish		Unit value for fish (GBP/Kg)
+uvfv		Unit value for fruit & vegetables (GBP/Kg)
