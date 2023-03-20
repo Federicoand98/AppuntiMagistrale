@@ -1,0 +1,151 @@
+## This file contains all the build statements describing the
+# compilation DAG.
+
+# =============================================================================
+# Write statements declared in CMakeLists.txt:
+# 
+# Which is the root file.
+# =============================================================================
+
+# =============================================================================
+# Project: 2D_SIERPINSKY
+# Configurations: Debug
+# =============================================================================
+
+#############################################
+# Minimal version of Ninja required by this file
+
+ninja_required_version = 1.5
+
+
+#############################################
+# Set configuration variable for custom commands.
+
+CONFIGURATION = Debug
+# =============================================================================
+# Include auxiliary files.
+
+
+#############################################
+# Include rules file.
+
+include CMakeFiles/rules.ninja
+
+# =============================================================================
+
+#############################################
+# Logical path to working directory; prefix for absolute paths.
+
+cmake_ninja_workdir = /Users/federyeeco/Sviluppo/Git/AppuntiMagistrale/Computer_Graphics/LAB_00/2D_SIERPINSKY/cmake-build-debug/
+# =============================================================================
+# Object build statements for EXECUTABLE target 2D_SIERPINSKY
+
+
+#############################################
+# Order-only phony target for 2D_SIERPINSKY
+
+build cmake_object_order_depends_target_2D_SIERPINSKY: phony || CMakeFiles/2D_SIERPINSKY.dir
+
+build CMakeFiles/2D_SIERPINSKY.dir/main.cpp.o: CXX_COMPILER__2D_SIERPINSKY_Debug /Users/federyeeco/Sviluppo/Git/AppuntiMagistrale/Computer_Graphics/LAB_00/2D_SIERPINSKY/main.cpp || cmake_object_order_depends_target_2D_SIERPINSKY
+  DEFINES = -DGL_SILENCE_DEPRECATION
+  DEP_FILE = CMakeFiles/2D_SIERPINSKY.dir/main.cpp.o.d
+  FLAGS = -framework Cocoa -framework IOKit -g -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX13.1.sdk -fcolor-diagnostics -F/Library/Developer/CommandLineTools/SDKs/MacOSX13.sdk/System/Library/Frameworks  -std=gnu++17
+  INCLUDES = -isystem /usr/local/include -isystem /usr/local/lib -iframework /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX13.1.sdk/System/Library/Frameworks
+  OBJECT_DIR = CMakeFiles/2D_SIERPINSKY.dir
+  OBJECT_FILE_DIR = CMakeFiles/2D_SIERPINSKY.dir
+
+build CMakeFiles/2D_SIERPINSKY.dir/ShaderMaker.cpp.o: CXX_COMPILER__2D_SIERPINSKY_Debug /Users/federyeeco/Sviluppo/Git/AppuntiMagistrale/Computer_Graphics/LAB_00/2D_SIERPINSKY/ShaderMaker.cpp || cmake_object_order_depends_target_2D_SIERPINSKY
+  DEFINES = -DGL_SILENCE_DEPRECATION
+  DEP_FILE = CMakeFiles/2D_SIERPINSKY.dir/ShaderMaker.cpp.o.d
+  FLAGS = -framework Cocoa -framework IOKit -g -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX13.1.sdk -fcolor-diagnostics -F/Library/Developer/CommandLineTools/SDKs/MacOSX13.sdk/System/Library/Frameworks  -std=gnu++17
+  INCLUDES = -isystem /usr/local/include -isystem /usr/local/lib -iframework /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX13.1.sdk/System/Library/Frameworks
+  OBJECT_DIR = CMakeFiles/2D_SIERPINSKY.dir
+  OBJECT_FILE_DIR = CMakeFiles/2D_SIERPINSKY.dir
+
+
+# =============================================================================
+# Link build statements for EXECUTABLE target 2D_SIERPINSKY
+
+
+#############################################
+# Link the executable 2D_SIERPINSKY
+
+build 2D_SIERPINSKY: CXX_EXECUTABLE_LINKER__2D_SIERPINSKY_Debug CMakeFiles/2D_SIERPINSKY.dir/main.cpp.o CMakeFiles/2D_SIERPINSKY.dir/ShaderMaker.cpp.o | /usr/local/lib/libglfw.3.3.dylib /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX13.1.sdk/System/Library/Frameworks/OpenGL.framework/OpenGL.tbd /usr/local/lib/libGLEW.2.2.0.dylib
+  FLAGS = -framework Cocoa -framework IOKit -g -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX13.1.sdk
+  LINK_LIBRARIES = -Wl,-rpath,/usr/local/lib  /usr/local/lib/libglfw.3.3.dylib  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX13.1.sdk/System/Library/Frameworks/OpenGL.framework/OpenGL.tbd  /usr/local/lib/libGLEW.2.2.0.dylib  -Xlinker -framework -Xlinker OpenGL
+  LINK_PATH = -F/Library/Developer/CommandLineTools/SDKs/MacOSX13.sdk/System/Library/Frameworks
+  OBJECT_DIR = CMakeFiles/2D_SIERPINSKY.dir
+  POST_BUILD = :
+  PRE_LINK = :
+  TARGET_FILE = 2D_SIERPINSKY
+  TARGET_PDB = 2D_SIERPINSKY.dbg
+
+
+#############################################
+# Utility command for edit_cache
+
+build CMakeFiles/edit_cache.util: CUSTOM_COMMAND
+  COMMAND = cd /Users/federyeeco/Sviluppo/Git/AppuntiMagistrale/Computer_Graphics/LAB_00/2D_SIERPINSKY/cmake-build-debug && "/Users/federyeeco/Library/Application Support/JetBrains/Toolbox/apps/CLion/ch-0/223.8617.54/CLion.app/Contents/bin/cmake/mac/bin/cmake" -E echo No\ interactive\ CMake\ dialog\ available.
+  DESC = No interactive CMake dialog available...
+  restat = 1
+
+build edit_cache: phony CMakeFiles/edit_cache.util
+
+
+#############################################
+# Utility command for rebuild_cache
+
+build CMakeFiles/rebuild_cache.util: CUSTOM_COMMAND
+  COMMAND = cd /Users/federyeeco/Sviluppo/Git/AppuntiMagistrale/Computer_Graphics/LAB_00/2D_SIERPINSKY/cmake-build-debug && "/Users/federyeeco/Library/Application Support/JetBrains/Toolbox/apps/CLion/ch-0/223.8617.54/CLion.app/Contents/bin/cmake/mac/bin/cmake" --regenerate-during-build -S/Users/federyeeco/Sviluppo/Git/AppuntiMagistrale/Computer_Graphics/LAB_00/2D_SIERPINSKY -B/Users/federyeeco/Sviluppo/Git/AppuntiMagistrale/Computer_Graphics/LAB_00/2D_SIERPINSKY/cmake-build-debug
+  DESC = Running CMake to regenerate build system...
+  pool = console
+  restat = 1
+
+build rebuild_cache: phony CMakeFiles/rebuild_cache.util
+
+# =============================================================================
+# Target aliases.
+
+# =============================================================================
+# Folder targets.
+
+# =============================================================================
+
+#############################################
+# Folder: /Users/federyeeco/Sviluppo/Git/AppuntiMagistrale/Computer_Graphics/LAB_00/2D_SIERPINSKY/cmake-build-debug
+
+build all: phony 2D_SIERPINSKY
+
+# =============================================================================
+# Built-in targets
+
+
+#############################################
+# Re-run CMake if any of its inputs changed.
+
+build build.ninja: RERUN_CMAKE | /Users/federyeeco/Library/Application$ Support/JetBrains/Toolbox/apps/CLion/ch-0/223.8617.54/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/CMakeCInformation.cmake /Users/federyeeco/Library/Application$ Support/JetBrains/Toolbox/apps/CLion/ch-0/223.8617.54/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/CMakeCXXInformation.cmake /Users/federyeeco/Library/Application$ Support/JetBrains/Toolbox/apps/CLion/ch-0/223.8617.54/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/CMakeCommonLanguageInclude.cmake /Users/federyeeco/Library/Application$ Support/JetBrains/Toolbox/apps/CLion/ch-0/223.8617.54/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/CMakeGenericSystem.cmake /Users/federyeeco/Library/Application$ Support/JetBrains/Toolbox/apps/CLion/ch-0/223.8617.54/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/CMakeInitializeConfigs.cmake /Users/federyeeco/Library/Application$ Support/JetBrains/Toolbox/apps/CLion/ch-0/223.8617.54/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/CMakeLanguageInformation.cmake /Users/federyeeco/Library/Application$ Support/JetBrains/Toolbox/apps/CLion/ch-0/223.8617.54/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/CMakeSystemSpecificInformation.cmake /Users/federyeeco/Library/Application$ Support/JetBrains/Toolbox/apps/CLion/ch-0/223.8617.54/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/CMakeSystemSpecificInitialize.cmake /Users/federyeeco/Library/Application$ Support/JetBrains/Toolbox/apps/CLion/ch-0/223.8617.54/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/Compiler/AppleClang-C.cmake /Users/federyeeco/Library/Application$ Support/JetBrains/Toolbox/apps/CLion/ch-0/223.8617.54/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/Compiler/AppleClang-CXX.cmake /Users/federyeeco/Library/Application$ Support/JetBrains/Toolbox/apps/CLion/ch-0/223.8617.54/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/Compiler/CMakeCommonCompilerMacros.cmake /Users/federyeeco/Library/Application$ Support/JetBrains/Toolbox/apps/CLion/ch-0/223.8617.54/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/Compiler/Clang.cmake /Users/federyeeco/Library/Application$ Support/JetBrains/Toolbox/apps/CLion/ch-0/223.8617.54/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/Compiler/GNU.cmake /Users/federyeeco/Library/Application$ Support/JetBrains/Toolbox/apps/CLion/ch-0/223.8617.54/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/FindGLEW.cmake /Users/federyeeco/Library/Application$ Support/JetBrains/Toolbox/apps/CLion/ch-0/223.8617.54/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/FindOpenGL.cmake /Users/federyeeco/Library/Application$ Support/JetBrains/Toolbox/apps/CLion/ch-0/223.8617.54/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/FindPackageHandleStandardArgs.cmake /Users/federyeeco/Library/Application$ Support/JetBrains/Toolbox/apps/CLion/ch-0/223.8617.54/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/FindPackageMessage.cmake /Users/federyeeco/Library/Application$ Support/JetBrains/Toolbox/apps/CLion/ch-0/223.8617.54/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/Platform/Apple-AppleClang-C.cmake /Users/federyeeco/Library/Application$ Support/JetBrains/Toolbox/apps/CLion/ch-0/223.8617.54/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/Platform/Apple-AppleClang-CXX.cmake /Users/federyeeco/Library/Application$ Support/JetBrains/Toolbox/apps/CLion/ch-0/223.8617.54/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/Platform/Apple-Clang-C.cmake /Users/federyeeco/Library/Application$ Support/JetBrains/Toolbox/apps/CLion/ch-0/223.8617.54/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/Platform/Apple-Clang-CXX.cmake /Users/federyeeco/Library/Application$ Support/JetBrains/Toolbox/apps/CLion/ch-0/223.8617.54/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/Platform/Apple-Clang.cmake /Users/federyeeco/Library/Application$ Support/JetBrains/Toolbox/apps/CLion/ch-0/223.8617.54/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/Platform/Darwin-Initialize.cmake /Users/federyeeco/Library/Application$ Support/JetBrains/Toolbox/apps/CLion/ch-0/223.8617.54/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/Platform/Darwin.cmake /Users/federyeeco/Library/Application$ Support/JetBrains/Toolbox/apps/CLion/ch-0/223.8617.54/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/Platform/UnixPaths.cmake /Users/federyeeco/Sviluppo/Git/AppuntiMagistrale/Computer_Graphics/LAB_00/2D_SIERPINSKY/CMakeLists.txt /usr/local/lib/cmake/glew/CopyImportedTargetProperties.cmake /usr/local/lib/cmake/glew/glew-config.cmake /usr/local/lib/cmake/glew/glew-targets-release.cmake /usr/local/lib/cmake/glew/glew-targets.cmake /usr/local/lib/cmake/glfw3/glfw3Config.cmake /usr/local/lib/cmake/glfw3/glfw3ConfigVersion.cmake /usr/local/lib/cmake/glfw3/glfw3Targets-release.cmake /usr/local/lib/cmake/glfw3/glfw3Targets.cmake /usr/local/lib/cmake/glm/glmConfig-version.cmake /usr/local/lib/cmake/glm/glmConfig.cmake CMakeCache.txt CMakeFiles/3.24.2/CMakeCCompiler.cmake CMakeFiles/3.24.2/CMakeCXXCompiler.cmake CMakeFiles/3.24.2/CMakeSystem.cmake
+  pool = console
+
+
+#############################################
+# A missing CMake input file is not an error.
+
+build /Users/federyeeco/Library/Application$ Support/JetBrains/Toolbox/apps/CLion/ch-0/223.8617.54/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/CMakeCInformation.cmake /Users/federyeeco/Library/Application$ Support/JetBrains/Toolbox/apps/CLion/ch-0/223.8617.54/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/CMakeCXXInformation.cmake /Users/federyeeco/Library/Application$ Support/JetBrains/Toolbox/apps/CLion/ch-0/223.8617.54/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/CMakeCommonLanguageInclude.cmake /Users/federyeeco/Library/Application$ Support/JetBrains/Toolbox/apps/CLion/ch-0/223.8617.54/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/CMakeGenericSystem.cmake /Users/federyeeco/Library/Application$ Support/JetBrains/Toolbox/apps/CLion/ch-0/223.8617.54/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/CMakeInitializeConfigs.cmake /Users/federyeeco/Library/Application$ Support/JetBrains/Toolbox/apps/CLion/ch-0/223.8617.54/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/CMakeLanguageInformation.cmake /Users/federyeeco/Library/Application$ Support/JetBrains/Toolbox/apps/CLion/ch-0/223.8617.54/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/CMakeSystemSpecificInformation.cmake /Users/federyeeco/Library/Application$ Support/JetBrains/Toolbox/apps/CLion/ch-0/223.8617.54/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/CMakeSystemSpecificInitialize.cmake /Users/federyeeco/Library/Application$ Support/JetBrains/Toolbox/apps/CLion/ch-0/223.8617.54/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/Compiler/AppleClang-C.cmake /Users/federyeeco/Library/Application$ Support/JetBrains/Toolbox/apps/CLion/ch-0/223.8617.54/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/Compiler/AppleClang-CXX.cmake /Users/federyeeco/Library/Application$ Support/JetBrains/Toolbox/apps/CLion/ch-0/223.8617.54/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/Compiler/CMakeCommonCompilerMacros.cmake /Users/federyeeco/Library/Application$ Support/JetBrains/Toolbox/apps/CLion/ch-0/223.8617.54/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/Compiler/Clang.cmake /Users/federyeeco/Library/Application$ Support/JetBrains/Toolbox/apps/CLion/ch-0/223.8617.54/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/Compiler/GNU.cmake /Users/federyeeco/Library/Application$ Support/JetBrains/Toolbox/apps/CLion/ch-0/223.8617.54/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/FindGLEW.cmake /Users/federyeeco/Library/Application$ Support/JetBrains/Toolbox/apps/CLion/ch-0/223.8617.54/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/FindOpenGL.cmake /Users/federyeeco/Library/Application$ Support/JetBrains/Toolbox/apps/CLion/ch-0/223.8617.54/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/FindPackageHandleStandardArgs.cmake /Users/federyeeco/Library/Application$ Support/JetBrains/Toolbox/apps/CLion/ch-0/223.8617.54/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/FindPackageMessage.cmake /Users/federyeeco/Library/Application$ Support/JetBrains/Toolbox/apps/CLion/ch-0/223.8617.54/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/Platform/Apple-AppleClang-C.cmake /Users/federyeeco/Library/Application$ Support/JetBrains/Toolbox/apps/CLion/ch-0/223.8617.54/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/Platform/Apple-AppleClang-CXX.cmake /Users/federyeeco/Library/Application$ Support/JetBrains/Toolbox/apps/CLion/ch-0/223.8617.54/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/Platform/Apple-Clang-C.cmake /Users/federyeeco/Library/Application$ Support/JetBrains/Toolbox/apps/CLion/ch-0/223.8617.54/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/Platform/Apple-Clang-CXX.cmake /Users/federyeeco/Library/Application$ Support/JetBrains/Toolbox/apps/CLion/ch-0/223.8617.54/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/Platform/Apple-Clang.cmake /Users/federyeeco/Library/Application$ Support/JetBrains/Toolbox/apps/CLion/ch-0/223.8617.54/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/Platform/Darwin-Initialize.cmake /Users/federyeeco/Library/Application$ Support/JetBrains/Toolbox/apps/CLion/ch-0/223.8617.54/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/Platform/Darwin.cmake /Users/federyeeco/Library/Application$ Support/JetBrains/Toolbox/apps/CLion/ch-0/223.8617.54/CLion.app/Contents/bin/cmake/mac/share/cmake-3.24/Modules/Platform/UnixPaths.cmake /Users/federyeeco/Sviluppo/Git/AppuntiMagistrale/Computer_Graphics/LAB_00/2D_SIERPINSKY/CMakeLists.txt /usr/local/lib/cmake/glew/CopyImportedTargetProperties.cmake /usr/local/lib/cmake/glew/glew-config.cmake /usr/local/lib/cmake/glew/glew-targets-release.cmake /usr/local/lib/cmake/glew/glew-targets.cmake /usr/local/lib/cmake/glfw3/glfw3Config.cmake /usr/local/lib/cmake/glfw3/glfw3ConfigVersion.cmake /usr/local/lib/cmake/glfw3/glfw3Targets-release.cmake /usr/local/lib/cmake/glfw3/glfw3Targets.cmake /usr/local/lib/cmake/glm/glmConfig-version.cmake /usr/local/lib/cmake/glm/glmConfig.cmake CMakeCache.txt CMakeFiles/3.24.2/CMakeCCompiler.cmake CMakeFiles/3.24.2/CMakeCXXCompiler.cmake CMakeFiles/3.24.2/CMakeSystem.cmake: phony
+
+
+#############################################
+# Clean all the built files.
+
+build clean: CLEAN
+
+
+#############################################
+# Print all primary targets available.
+
+build help: HELP
+
+
+#############################################
+# Make the all target the default.
+
+default all

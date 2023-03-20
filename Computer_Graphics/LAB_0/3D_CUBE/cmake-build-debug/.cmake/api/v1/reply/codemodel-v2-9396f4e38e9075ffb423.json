@@ -1,0 +1,60 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"jsonFile" : "directory-.-Debug-f5ebdc15457944623624.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.2"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "3D_CUBE",
+					"targetIndexes" : 
+					[
+						0
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "3D_CUBE::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-3D_CUBE-Debug-0677d9ec82462f3ce5c6.json",
+					"name" : "3D_CUBE",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "/Users/federyeeco/Sviluppo/Git/AppuntiMagistrale/Computer_Graphics/LAB_0/3D_CUBE/cmake-build-debug",
+		"source" : "/Users/federyeeco/Sviluppo/Git/AppuntiMagistrale/Computer_Graphics/LAB_0/3D_CUBE"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 4
+	}
+}

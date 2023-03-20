@@ -1,0 +1,3 @@
+/Users/federyeeco/Sviluppo/Git/AppuntiMagistrale/Computer_Graphics/LAB_0/3D_CUBE/cmake-build-debug/CMakeFiles/3D_CUBE.dir
+/Users/federyeeco/Sviluppo/Git/AppuntiMagistrale/Computer_Graphics/LAB_0/3D_CUBE/cmake-build-debug/CMakeFiles/edit_cache.dir
+/Users/federyeeco/Sviluppo/Git/AppuntiMagistrale/Computer_Graphics/LAB_0/3D_CUBE/cmake-build-debug/CMakeFiles/rebuild_cache.dir

@@ -1,0 +1,60 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"jsonFile" : "directory-.-Debug-f5ebdc15457944623624.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.24"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "NAME",
+					"targetIndexes" : 
+					[
+						0
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "NAME::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-NAME-Debug-a0d0722fb042e3643b59.json",
+					"name" : "NAME",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "/Users/federyeeco/Sviluppo/Git/AppuntiMagistrale/Computer_Graphics/LAB_00/2D_TRIANGLE/cmake-build-debug",
+		"source" : "/Users/federyeeco/Sviluppo/Git/AppuntiMagistrale/Computer_Graphics/LAB_00/2D_TRIANGLE"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 4
+	}
+}

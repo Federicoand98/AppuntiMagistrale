@@ -1,0 +1,3 @@
+/Users/federyeeco/Sviluppo/Git/AppuntiMagistrale/Computer_Graphics/LAB_00/2D_TRIANGLE/cmake-build-debug/CMakeFiles/NAME.dir
+/Users/federyeeco/Sviluppo/Git/AppuntiMagistrale/Computer_Graphics/LAB_00/2D_TRIANGLE/cmake-build-debug/CMakeFiles/edit_cache.dir
+/Users/federyeeco/Sviluppo/Git/AppuntiMagistrale/Computer_Graphics/LAB_00/2D_TRIANGLE/cmake-build-debug/CMakeFiles/rebuild_cache.dir
