@@ -27,6 +27,12 @@
     <ClCompile Include="ShaderMaker.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
+    <ClCompile Include="Enemy.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="Projectile.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -41,6 +47,15 @@
       <Filter>File di intestazione</Filter>
     </ClInclude>
     <ClInclude Include="ShaderMaker.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="Enemy.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="Projectile.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="Common.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
   </ItemGroup>

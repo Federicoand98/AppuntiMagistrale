@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <random>
 #include <time.h>
 #include <iostream>
 #include <GL/glew.h>
@@ -11,28 +12,24 @@
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "Common.h"
-#include "Projectile.h"
 
-class Actor {
+class Enemy {
 
 public:
-	Actor(class Game* game, float width, float height);
-	virtual ~Actor();
+	Enemy(class Game* game, float width, float height);
+	virtual ~Enemy();
 
 	void Init();
 	void Draw();
-
+	// Called every frame to update the Enemy 
 	void Update(float deltaTime);
 
-	void ProcessKeyboardInput(GLFWwindow* window);
-
-	void Shoot();
+	void ChooseNewDirection();
 
 	Transform GetTransform() const { return mTransform; }
-	float GetWidth() const { return mActorWidth; }
-	float GetHeight() const { return mActorHeight; }
-	std::vector<class Projectile*> GetProjectiles() { return mProjectiles; }
-	
+	float GetWidth() const { return mEnemyWidth; }
+	float GetHeight() const { return mEnemyHeight; }
+
 private:
 	void initShader();
 
@@ -41,10 +38,8 @@ private:
 	Transform mTransform;
 	Vector mDirection;
 	float mSpeed;
-	float mActorWidth;
-	float mActorHeight;
-	float mRotation;
-	float mShootingCooldown;
+	float mEnemyWidth;
+	float mEnemyHeight;
 	time_t mSeconds;
 
 	unsigned int mVAO;
@@ -57,6 +52,6 @@ private:
 	int mVertices = 3 * 2 * mNTriangles;
 
 	std::vector<Point> mPoints;
-	std::vector<class Projectile*> mProjectiles ;
+
 };
 

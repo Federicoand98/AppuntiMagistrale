@@ -11,45 +11,45 @@
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "Common.h"
-#include "Projectile.h"
 
-class Actor {
-
+class Projectile {
 public:
-	Actor(class Game* game, float width, float height);
-	virtual ~Actor();
+	Projectile(class Game* game, float width, float height, Vector spawnPosition, int direction);
+	virtual ~Projectile();
 
 	void Init();
 	void Draw();
-
+	// Called every frame to update the Actor
 	void Update(float deltaTime);
 
-	void ProcessKeyboardInput(GLFWwindow* window);
-
-	void Shoot();
-
 	Transform GetTransform() const { return mTransform; }
-	float GetWidth() const { return mActorWidth; }
-	float GetHeight() const { return mActorHeight; }
-	std::vector<class Projectile*> GetProjectiles() { return mProjectiles; }
-	
+	float GetWidth() const { return mWidth; }
+	float GetHeight() const { return mHeight; }
+	float GetTime() const { return mSeconds; }
+	float GetTimeToLive() const { return mTimeToLive; }
+
 private:
 	void initShader();
+	Color computeRainbow();
 
 	class Game* mGame;
 
 	Transform mTransform;
 	Vector mDirection;
+	Vector mSpawnPosition;
 	float mSpeed;
-	float mActorWidth;
-	float mActorHeight;
+	float mWidth;
+	float mHeight;
 	float mRotation;
-	float mShootingCooldown;
-	time_t mSeconds;
+	float mSeconds;
+	float mTimeToLive;
 
 	unsigned int mVAO;
 	unsigned int mVBO;
+	unsigned int mVAOP;
+	unsigned int mVBOP;
 	unsigned int mShaderId;
+	unsigned int mShaderIdP;
 	unsigned int mMatModel;
 	unsigned int mProjModel;
 
@@ -57,6 +57,7 @@ private:
 	int mVertices = 3 * 2 * mNTriangles;
 
 	std::vector<Point> mPoints;
-	std::vector<class Projectile*> mProjectiles ;
+	std::vector<Particle> mParticles;
+	std::vector<Point> mParticlePoints;
 };
 
