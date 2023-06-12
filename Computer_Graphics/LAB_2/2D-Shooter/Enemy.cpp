@@ -161,8 +161,10 @@ void Enemy::Update(float deltaTime) {
 	mTransform.yPos += mDirection.y * mSpeed * deltaTime;
 
 	// check if the position is over the screen 
-	if (mTransform.xPos > mGame->GetWidth() - mEnemyWidth * 2 || mTransform.xPos <= 0 + mEnemyWidth * 2 || mTransform.yPos > mGame->GetHeight() - mEnemyHeight * 2|| mTransform.yPos <= 0 + mEnemyHeight * 2) {
-		ChooseNewDirection();
+	if (mTransform.xPos > mGame->GetWidth() - mEnemyWidth || mTransform.xPos <= 0 + mEnemyWidth || mTransform.yPos > mGame->GetHeight() - mEnemyHeight|| mTransform.yPos <= 0 + mEnemyHeight) {
+		//ChooseNewDirection();
+		mDirection.x = -mDirection.x;
+		mDirection.y = -mDirection.y;
 	}
 }
 

@@ -2,7 +2,7 @@
 
 #include "Game.h"
 
-Actor::Actor(class Game* game, float width, float height) : mVAO(0), mVBO(0), mShaderId(0), mDirection({0, 0}), mSpeed(250), mRotation(20.0f), mShootingCooldown(0.3) {
+Actor::Actor(class Game* game, float width, float height) : mNumLives(3), mVAO(0), mVBO(0), mShaderId(0), mDirection({0, 0}), mSpeed(250), mRotation(20.0f), mShootingCooldown(0.3), mInvincibleCooldown(1), mShootingDirection(RIGHT) {
 	this->mGame = game;
 
 	this->mTransform = {
@@ -12,10 +12,13 @@ Actor::Actor(class Game* game, float width, float height) : mVAO(0), mVBO(0), mS
 		1.0f
 	};
 
+	this->mColor = { 1, 0, 0 };
+
 	this->mActorWidth = width;
 	this->mActorHeight = height;
 
 	this->mSeconds = time(nullptr);
+	this->mInvSeconds = time(nullptr);
 }
 
 Actor::~Actor() {
@@ -44,6 +47,16 @@ void Actor::initShader() {
 	glUseProgram(mShaderId);
 }
 
+void Actor::TakeDamage() {
+	if(mNumLives > 0) {
+		mInvSeconds = time(nullptr);
+
+		mNumLives--;
+		mIsInvincible = true;
+	}
+}
+
+
 void Actor::Init() {
 	float step = (1.7 * PI) / mNTriangles;
 	int comp = 0;
@@ -54,9 +67,9 @@ void Actor::Init() {
 		float x2 = cos((i + 1) * step);
 		float y2 = sin((i + 1) * step);
 
-		mPoints.push_back({ x, y, 1.0, 0.0, 0.0, 1.0 });
-		mPoints.push_back({ x2, y2, 1.0, 0.0, 0.0, 1.0 });
-		mPoints.push_back({ 0, 0, 1.0, 0.0, 0.0, 1.0 });
+		mPoints.push_back({ x, y, mColor.r, mColor.g, mColor.b, 1.0 });
+		mPoints.push_back({ x2, y2, mColor.r, mColor.g, mColor.b, 1.0 });
+		mPoints.push_back({ 0, 0, mColor.r, mColor.g, mColor.b, 1.0 });
 	}
 
 	initShader();
@@ -119,6 +132,16 @@ void Actor::Update(float deltaTime) {
 			mProjectiles.erase(mProjectiles.begin() + i);
 		}
 	}
+
+	if(current - mInvSeconds > mInvincibleCooldown) {
+		mIsInvincible = false;
+		mColor = { 1, 0, 0 };
+	}
+
+	if(mIsInvincible) {
+		mRotation += 10;
+	}
+
 }
 
 void Actor::Shoot() {
@@ -127,21 +150,7 @@ void Actor::Shoot() {
 	if (currentSeconds - mSeconds > mShootingCooldown) {
 		mSeconds = time(nullptr);
 
-		int direction;
-
-		if(mDirection.x > 0) {
-			direction = RIGHT;
-		} else if(mDirection.x < 0) {
-			direction = LEFT;
-		} else if(mDirection.y > 0) {
-			direction = UP;
-		} else if(mDirection.y < 0) {
-			direction = DOWN;
-		} else {
-			direction = RIGHT;
-		}
-
-		Projectile* p = new Projectile(mGame, 15, 15, { mTransform.xPos, mTransform.yPos }, direction);
+		Projectile* p = new Projectile(mGame, 15, 15, { mTransform.xPos, mTransform.yPos }, mShootingDirection);
 
 		p->Init();
 
@@ -156,21 +165,25 @@ void Actor::ProcessKeyboardInput(GLFWwindow* window) {
 	if(glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
 		mDirection.x += 1;
 		mRotation = 20.0f;
+		mShootingDirection = RIGHT;
 	}
 
 	if(glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
 		mDirection.x -= 1;
 		mRotation = 200.0f;
+		mShootingDirection = LEFT;
 	}
 
 	if(glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
 		mDirection.y += 1;
 		mRotation = 110.0f;
+		mShootingDirection = UP;
 	}
 
 	if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
 		mDirection.y -= 1;
 		mRotation = 290.0f;
+		mShootingDirection = DOWN;
 	}
 
 	if(glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {

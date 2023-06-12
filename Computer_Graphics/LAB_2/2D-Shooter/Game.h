@@ -6,6 +6,9 @@
 #include "Actor.h"
 #include "Enemy.h"
 #include "Projectile.h"
+#include "Background.h"
+#include "Hearth.h"
+#include "Skull.h"
 
 class Game {
 
@@ -45,17 +48,15 @@ private:
 	int mHeight;
 
 	// background
-	unsigned int mBackgroundShader;
-	unsigned int mVAO;
-	unsigned int mVBO;
-	unsigned int mTime;
-	unsigned int mRes;
-	std::vector<Vector> mPoints;
+	class Background* mBackground;
 
 	// gameplay related things
 	int mNumEnemies;
+	int mNumEnemiesKilled;
 
 	class Actor* mActor;
 	std::vector<class Enemy*> mEnemies;
+	std::vector<class Hearth*> mHearth;
+	std::vector<class Skull*> mSkulls;
 };
 

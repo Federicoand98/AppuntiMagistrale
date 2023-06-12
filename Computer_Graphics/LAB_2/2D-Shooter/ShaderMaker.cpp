@@ -64,7 +64,6 @@ GLuint ShaderMaker::createProgram(char* vertexfilename, char* fragmentfilename)
 
 
 	ErrorCheckValue = glGetError();
-	std::cout << ErrorCheckValue;
 
 	if (ErrorCheckValue != GL_NO_ERROR)
 	{

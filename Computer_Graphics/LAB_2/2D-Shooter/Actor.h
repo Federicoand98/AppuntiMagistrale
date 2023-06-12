@@ -28,9 +28,13 @@ public:
 
 	void Shoot();
 
+	void TakeDamage();
+
 	Transform GetTransform() const { return mTransform; }
 	float GetWidth() const { return mActorWidth; }
 	float GetHeight() const { return mActorHeight; }
+	int GetLives() const { return mNumLives; }
+	bool IsInvincible() const { return mIsInvincible; }
 	std::vector<class Projectile*> GetProjectiles() { return mProjectiles; }
 	
 private:
@@ -40,18 +44,24 @@ private:
 
 	Transform mTransform;
 	Vector mDirection;
+	int mNumLives;
+	bool mIsInvincible;
 	float mSpeed;
 	float mActorWidth;
 	float mActorHeight;
 	float mRotation;
 	float mShootingCooldown;
+	float mInvincibleCooldown;
+	int mShootingDirection;
 	time_t mSeconds;
+	time_t mInvSeconds;
 
 	unsigned int mVAO;
 	unsigned int mVBO;
 	unsigned int mShaderId;
 	unsigned int mMatModel;
 	unsigned int mProjModel;
+	Color mColor;
 
 	int mNTriangles = 30;
 	int mVertices = 3 * 2 * mNTriangles;

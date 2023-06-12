@@ -30,7 +30,6 @@ public:
 
 private:
 	void initShader();
-	Color computeRainbow();
 
 	class Game* mGame;
 

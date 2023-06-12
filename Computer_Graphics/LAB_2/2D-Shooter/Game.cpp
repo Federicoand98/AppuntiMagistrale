@@ -1,12 +1,21 @@
 #include "Game.h"
 
-Game::Game(int width, int height) : mWindow(nullptr), mIsRunning(true), mDeltaTime(0), mLastFrame(0), mNumEnemies(10) {
+Game::Game(int width, int height) : mWindow(nullptr), mIsRunning(true), mDeltaTime(0), mLastFrame(0), mNumEnemies(10), mNumEnemiesKilled(0) {
 	mWidth = width;
 	mHeight = height;
+
+	mBackground = new Background(this);
+
 	mActor = new Actor(this, 40.0, 40.0);
 
 	for(int i = 0; i < mNumEnemies; i++) {
 		mEnemies.push_back(new Enemy(this, 20.0, 20.0));
+	}
+
+	for(int i = 1; i <= mActor->GetLives(); i++) {
+		float x = 45 * (float)i;
+		float y = mHeight - 45;
+		mHearth.push_back(new Hearth(this, 15, 15, {x, y}));
 	}
 }
 
@@ -38,10 +47,14 @@ bool Game::Initialize() {
 		return false;
 	}
 
-	//InitBackground();
+	mBackground->Init(mActor->GetLives());
 
 	for(Enemy* e : mEnemies) {
 		e->Init();
+	}
+
+	for(Hearth* h : mHearth) {
+		h->Init();
 	}
 
 	mActor->Init();
@@ -59,13 +72,24 @@ void Game::RunLoop() {
 }
 
 void Game::Shutdown() {
+	delete mBackground;
 	delete mActor;
 
 	for(Enemy* e : mEnemies) {
 		delete e;
 	}
 
+	for (Hearth* h : mHearth) {
+		delete h;
+	}
+
+	for(Skull* s : mSkulls) {
+		delete s;
+	}
+
+	mSkulls.clear();
 	mEnemies.clear();
+	mHearth.clear();
 
 	glfwSetWindowShouldClose(mWindow, mIsRunning);
 	glfwTerminate();
@@ -85,12 +109,17 @@ void Game::UpdateGame() {
 	mDeltaTime = currentFrame - mLastFrame;
 	mLastFrame = currentFrame;
 
+	mBackground->Update(mDeltaTime);
+
 	mActor->Update(mDeltaTime);
 
 	for(Enemy* e : mEnemies) {
 		e->Update(mDeltaTime);
 	}
 
+	for(Skull* s : mSkulls) {
+		s->Update(mDeltaTime);
+	}
 
 	if(mActor->GetProjectiles().size() > 0) {
 		for(Projectile* proj : mActor->GetProjectiles()) {
@@ -101,18 +130,18 @@ void Game::UpdateGame() {
 	// collision detection
 	bool collided = false;
 
-	// if an enemy touch the player -> GAME OVER
-	/*
-	for (int i = 0; i < mEnemies.size() && !collided; i++) {
+	// if an enemy touch the player -> Take damage
+	for (int i = 0; i < mEnemies.size() && !mActor->IsInvincible() && !collided; i++) {
 		float dist = distance(mActor->GetTransform(), mEnemies.at(i)->GetTransform());
 
 		if (dist < mActor->GetWidth() + mEnemies.at(i)->GetWidth()) {
 			collided = true;
 
-			mIsRunning = false;
+			delete mHearth.at(mActor->GetLives() - 1);
+			mHearth.pop_back();
+			mActor->TakeDamage();
 		}
 	}
-	*/
 
 	collided = false;
 
@@ -128,6 +157,13 @@ void Game::UpdateGame() {
 
 					delete mEnemies.at(i);
 					mEnemies.erase(mEnemies.begin() + i);
+
+					float skullX = mWidth - 60;
+					float skullY = 60 * (mSkulls.size() + 1);
+					Skull* skull = new Skull(this, 15, 15, { skullX, skullY });
+					skull->Init();
+					mSkulls.push_back(skull);
+					std::cout << mSkulls.size() << std::endl;
 				}
 			}
 		}
@@ -137,17 +173,29 @@ void Game::UpdateGame() {
 	if(mEnemies.empty()) {
 		mIsRunning = false;
 	}
+
+	if(mActor->GetLives() == 0 && mHearth.empty()) {
+		mIsRunning = false;
+	}
 }
 
 void Game::GenerateOutput() {
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	//DrawBackground();
+	mBackground->Draw();
 
 	mActor->Draw();
 
 	for(Enemy* e : mEnemies) {
 		e->Draw();
+	}
+
+	for (Hearth* h : mHearth) {
+		h->Draw();
+	}
+
+	for(Skull* s : mSkulls) {
+		s->Draw();
 	}
 
 	if(mActor->GetProjectiles().size() > 0) {
@@ -158,46 +206,6 @@ void Game::GenerateOutput() {
 	
 	glfwPollEvents();
 	glfwSwapBuffers(mWindow);
-}
-
-void Game::InitBackground() {
-	GLenum ErrorCheckValue = glGetError();
-
-	char* vertexShader = (char*)"shaders/vertexBG.glsl";
-	char* fragmentShader = (char*)"shaders/fragmentBG.glsl";
-
-	mBackgroundShader = ShaderMaker::createProgram(vertexShader, fragmentShader);
-	glUseProgram(mBackgroundShader);
-
-	mPoints.push_back({ 1, 1 });
-	mPoints.push_back({ -1, 1 });
-	mPoints.push_back({ -1, -1 });
-	mPoints.push_back({ -1, -1 });
-	mPoints.push_back({ 1, -1 });
-	mPoints.push_back({ 1, 1 });
-
-	mTime = glGetUniformLocation(mBackgroundShader, "time");
-	mRes = glGetUniformLocation(mBackgroundShader, "resolution");
-
-	glGenVertexArrays(1, &mVAO);
-	glBindVertexArray(mVAO);
-	glGenBuffers(1, &mVBO);
-	glBindBuffer(GL_ARRAY_BUFFER, mVBO);
-	glBufferData(GL_ARRAY_BUFFER, mPoints.size() * sizeof(Vector), &mPoints.at(0), GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-	glBindVertexArray(0);
-}
-
-void Game::DrawBackground() {
-	float time = static_cast<float>(glfwGetTime());
-	glm::vec2 res = glm::vec2(mWidth, mHeight);
-
-	glUniform1f(mTime, time);
-	glUniformMatrix2fv(mRes, 1, GL_FALSE, glm::value_ptr(res));
-
-	glBindVertexArray(mVAO);
-	glDrawArrays(GL_TRIANGLES, 0, mPoints.size());
 }
 
 
