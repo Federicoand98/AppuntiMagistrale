@@ -42,9 +42,6 @@
     <ClCompile Include="Skull.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
-    <ClCompile Include="ParticleSystem.cpp">
-      <Filter>File di origine</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -77,9 +74,6 @@
       <Filter>File di intestazione</Filter>
     </ClInclude>
     <ClInclude Include="Skull.h">
-      <Filter>File di intestazione</Filter>
-    </ClInclude>
-    <ClInclude Include="ParticleSystem.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
   </ItemGroup>

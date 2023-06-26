@@ -64,9 +64,9 @@ void Enemy::Init() {
 		float x2 = cos((i + 1) * step);
 		float y2 = sin((i + 1) * step);
 
-		mPoints.push_back({ x, y, 0.0, 0.0, 1.0, 1.0 });
-		mPoints.push_back({ x2, y2, 0.0, 0.0, 1.0, 1.0 });
-		mPoints.push_back({ 0, 0, 0.0, 0.0, 1.0, 1.0 });
+		mPoints.push_back({ x, y, 0.5, 0.0, 1.0, 1.0 });
+		mPoints.push_back({ x2, y2, 0.5, 0.0, 1.0, 1.0 });
+		mPoints.push_back({ 0, 0, 0.5, 0.0, 1.0, 1.0 });
 	}
 
 	for (double i = 0; i < mNTriangles; i += step) {
@@ -91,27 +91,27 @@ void Enemy::Init() {
 		mPoints.push_back({ 0, 0, 1.0, 1.0, 1.0, 1.0 });
 	}
 
-	mPoints.push_back({ 1, 0, 0, 0, 1, 0 });
-	mPoints.push_back({ -1, 0, 0, 0, 1, 0 });
-	mPoints.push_back({ 1, -0.5, 0, 0, 1, 0 });
-	mPoints.push_back({ 1, -0.5, 0, 0, 1, 0 });
-	mPoints.push_back({ -1, 0, 0, 0, 1, 0 });
-	mPoints.push_back({ -1, -0.5, 0, 0, 1, 0 });
-	mPoints.push_back({ -1, -0.5, 0, 0, 1, 0 });
-	mPoints.push_back({ -0.8, -1, 0, 0, 1, 0 });
-	mPoints.push_back({ -0.6, -0.5, 0, 0, 1, 0 });
-	mPoints.push_back({ -0.6, -0.5, 0, 0, 1, 0 });
-	mPoints.push_back({ -0.4, -1, 0, 0, 1, 0 });
-	mPoints.push_back({ -0.2, -0.5, 0, 0, 1, 0 });
-	mPoints.push_back({ -0.2, -0.5, 0, 0, 1, 0 });
-	mPoints.push_back({ 0, -1, 0, 0, 1, 0 });
-	mPoints.push_back({ 0.2, -0.5, 0, 0, 1, 0 });
-	mPoints.push_back({ 0.2, -0.5, 0, 0, 1, 0 });
-	mPoints.push_back({ 0.4, -1, 0, 0, 1, 0 });
-	mPoints.push_back({ 0.6, -0.5, 0, 0, 1, 0 });
-	mPoints.push_back({ 0.6, -0.5, 0, 0, 1, 0 });
-	mPoints.push_back({ 0.8, -1, 0, 0, 1, 0 });
-	mPoints.push_back({ 1, -0.5, 0, 0, 1, 0 });
+	mPoints.push_back({ 1, 0, 0.5, 0, 1, 0 });
+	mPoints.push_back({ -1, 0, 0.5, 0, 1, 0 });
+	mPoints.push_back({ 1, -0.5, 0.5, 0, 1, 0 });
+	mPoints.push_back({ 1, -0.5, 0.5, 0, 1, 0 });
+	mPoints.push_back({ -1, 0, 0.5, 0, 1, 0 });
+	mPoints.push_back({ -1, -0.5, 0.5, 0, 1, 0 });
+	mPoints.push_back({ -1, -0.5, 0.5, 0, 1, 0 });
+	mPoints.push_back({ -0.8, -1, 0.5, 0, 1, 0 });
+	mPoints.push_back({ -0.6, -0.5, 0.5, 0, 1, 0 });
+	mPoints.push_back({ -0.6, -0.5, 0.5, 0, 1, 0 });
+	mPoints.push_back({ -0.4, -1, 0.5, 0, 1, 0 });
+	mPoints.push_back({ -0.2, -0.5, 0.5, 0, 1, 0 });
+	mPoints.push_back({ -0.2, -0.5, 0.5, 0, 1, 0 });
+	mPoints.push_back({ 0, -1, 0, 0.5, 1, 0 });
+	mPoints.push_back({ 0.2, -0.5, 0.5, 0, 1, 0 });
+	mPoints.push_back({ 0.2, -0.5, 0.5, 0, 1, 0 });
+	mPoints.push_back({ 0.4, -1, 0.5, 0, 1, 0 });
+	mPoints.push_back({ 0.6, -0.5, 0.5, 0, 1, 0 });
+	mPoints.push_back({ 0.6, -0.5, 0.5, 0, 1, 0 });
+	mPoints.push_back({ 0.8, -1, 0.5, 0, 1, 0 });
+	mPoints.push_back({ 1, -0.5, 0.5, 0, 1, 0 });
 
 	initShader();
 

@@ -135,7 +135,6 @@
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="Hearth.cpp" />
     <ClCompile Include="Main.cpp" />
-    <ClCompile Include="ParticleSystem.cpp" />
     <ClCompile Include="Projectile.cpp" />
     <ClCompile Include="ShaderMaker.cpp" />
     <ClCompile Include="Skull.cpp" />
@@ -152,7 +151,6 @@
     <ClInclude Include="Enemy.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="Hearth.h" />
-    <ClInclude Include="ParticleSystem.h" />
     <ClInclude Include="Projectile.h" />
     <ClInclude Include="ShaderMaker.h" />
     <ClInclude Include="Skull.h" />
