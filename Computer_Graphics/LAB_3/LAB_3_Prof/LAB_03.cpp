@@ -932,11 +932,19 @@ void moveCameraBack()
 void moveCameraLeft()
 {
 	//TODO
+	glm::vec3 direction = ViewSetup.target - ViewSetup.position;
+	glm::vec3 slide = glm::cross(direction, glm::vec3(ViewSetup.upVector)) * CAMERA_TRASLATION_SPEED;
+	ViewSetup.position += glm::vec4(slide, 0.0);
+	ViewSetup.target += glm::vec4(slide, 0.0);
 }
 
 void moveCameraRight()
 {
 	//TODO
+	glm::vec3 direction = ViewSetup.target - ViewSetup.position;
+	glm::vec3 slide = glm::cross(direction, glm::vec3(ViewSetup.upVector)) * CAMERA_TRASLATION_SPEED;
+	ViewSetup.position -= glm::vec4(slide, 0.0);
+	ViewSetup.target -= glm::vec4(slide, 0.0);
 }
 
 void moveCameraUp()
