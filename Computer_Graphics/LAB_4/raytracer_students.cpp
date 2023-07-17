@@ -61,13 +61,13 @@ Vec3f RayTracer::TraceRay (Ray & ray, Hit & hit, int bounce_count) const {
 	bool intersect = CastRay (ray, hit, false);
 
 	if( bounce_count == args->num_bounces )
-	RayTree::SetMainSegment (ray, 0, hit.getT () );
+		RayTree::SetMainSegment (ray, 0, hit.getT () );
 	else
-	RayTree::AddReflectedSegment(ray, 0, hit.getT() );
+		RayTree::AddReflectedSegment(ray, 0, hit.getT() );
 
 	Vec3f answer = args->background_color;
 
-	Material *m = hit.getMaterial ();
+	Material *m = hit.getMaterial();
 
 	if (intersect == true) {
 		assert (m != NULL);
@@ -83,9 +83,7 @@ Vec3f RayTracer::TraceRay (Ray & ray, Hit & hit, int bounce_count) const {
 		Vec3f reflectiveColor = m->getReflectiveColor ();
 
 		// ==========================================
-		// ASSIGNMENT:  ADD REFLECTIVE LOGIC
-		// ==========================================
-
+		// REFLECTIVE LOGIC
 		if(reflectiveColor.Length() != 0 && bounce_count > 0) {
 			Vec3f VRay = ray.getDirection();
 			Vec3f reflectionRay = VRay - (2 * VRay.Dot3(normal) * normal);
@@ -95,37 +93,72 @@ Vec3f RayTracer::TraceRay (Ray & ray, Hit & hit, int bounce_count) const {
 			answer += TraceRay(*new_ray, hit, bounce_count - 1) * reflectiveColor;
 		}
 
-		// SOFT
+		int num_lights = mesh->getLights ().size ();
 
-		Hit* new_hit;
-		bool colpito;
+		// ==========================================
+		// SHADOW LOGIC 
 		Ray* n_ray;
+		Hit* n_hit;
+		bool colpito;
 		Vec3f n_point, dista, pointOnLight, dirToLight;
 
-		int num_lights = mesh->getLights ().size ();
-		for (int i = 0; i < num_lights; i++) {
-			// ==========================================
-			// ASSIGNMENT:  ADD SHADOW LOGIC
-			// ==========================================
-			Face *f = mesh->getLights ()[i];
-			Vec3f pointOnLight = f->computeCentroid ();
-			Vec3f dirToLight = pointOnLight - point;
-			dirToLight.Normalize ();
+		if(args->softShadow) {
+			for(int i = 0; i < num_lights; i++) {
+				Face* f = mesh->getLights()[i];
 
-			n_ray = new Ray(point, dirToLight);
-			new_hit = new Hit();
-			colpito = CastRay(*n_ray, *new_hit, false);
+				std::vector<Vec3f> pointsOnLigh;
+				std::vector<Vec3f> directionsToLight;
 
-			if(colpito) {
-				n_point = n_ray->pointAtParameter(new_hit->getT());
+				// random points on area light
+				for(int j = 0; j < 100; j++) {
+					pointsOnLigh.push_back(f->RandomPoint());
+					Vec3f dirToLight = pointsOnLigh.at(j) - point;
+					dirToLight.Normalize();
+					directionsToLight.push_back(dirToLight);
+				}
 
-				//calcola il vettore disranca fra il punto colpito dal raggio e il punto sulla luce
-				dista.Sub(dista, n_point, pointOnLight);
+				for(int j = 0; j < pointsOnLigh.size(); j++) {
+					n_ray = new Ray(point, directionsToLight.at(j));
+					n_hit = new Hit();
+					colpito = CastRay(*n_ray, *n_hit, false);
 
-				if(dista.Length() < 0.01) {
-					if(normal.Dot3(dirToLight) > 0) {
-						Vec3f lightColor = 0.2 * f->getMaterial()->getEmittedColor() * f->getArea();
-						answer += m->Shade(ray, hit, dirToLight, lightColor, args);
+					if(colpito) {
+						n_point = n_ray->pointAtParameter(n_hit->getT());
+						dista.Sub(dista, n_point, pointsOnLigh.at(j));
+
+						if(dista.Length() < 0.01 && normal.Dot3(directionsToLight.at(j)) > 0) {
+							Vec3f lightColor = 0.002 * f->getMaterial()->getEmittedColor() * f->getArea();
+							answer += m->Shade(ray, hit, directionsToLight.at(j), lightColor, args);
+						}
+					}
+				}
+			}
+		} else {
+			// Contributo luminoso di ogni luce in scena
+			for (int i = 0; i < num_lights; i++) {
+				Face *f = mesh->getLights ()[i];
+				// si tratta la area light come point light
+				Vec3f pointOnLight = f->computeCentroid();
+				Vec3f dirToLight = pointOnLight - point;
+				dirToLight.Normalize ();
+
+				// si casta il raggio dal punto toccato verso la sorgente luminosa
+				n_ray = new Ray(point, dirToLight);
+				n_hit = new Hit();
+				colpito = CastRay(*n_ray, *n_hit, false);
+
+				if(colpito) {
+					// si ottiene il punto di collisione
+					n_point = n_ray->pointAtParameter(n_hit->getT());
+
+					//calcola disranza fra il punto colpito il punto sulla luce
+					dista.Sub(dista, n_point, pointOnLight);
+					if(dista.Length() < 0.01) {
+						if(normal.Dot3(dirToLight) > 0) {
+							// si applica il contributo della luce
+							Vec3f lightColor = 0.2 * f->getMaterial()->getEmittedColor() * f->getArea();
+							answer += m->Shade(ray, hit, dirToLight, lightColor, args);
+						}
 					}
 				}
 			}

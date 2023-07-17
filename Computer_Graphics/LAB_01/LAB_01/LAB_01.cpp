@@ -41,8 +41,8 @@ struct Point {
 static unsigned int programId;
 
 Curve curve;
-CurveType type = CATMULLROM;
-static unsigned int curve_type = 0;
+CurveType type = SUBDIVISION;
+static unsigned int curve_type = 2;
 
 unsigned int VAO;
 unsigned int VBO;
