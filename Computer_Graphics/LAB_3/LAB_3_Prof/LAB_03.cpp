@@ -29,6 +29,7 @@ based on the OpenGL Shading Language (GLSL) specifications.
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/string_cast.hpp>
 
 #include "HUD_Logger.h"
 #include "ShaderMaker.h"
@@ -116,6 +117,7 @@ static Object Axis, Grid;
 static vector<Object> objects;
 static vector<Material> materials;
 static int selected_obj = 0;
+vector<glm::vec3> distances;
 
 // Materiali disponibili
 glm::vec3 red_plastic_ambient = { 0.1, 0.0, 0.0 }, red_plastic_diffuse = { 0.6, 0.1, 0.1 }, red_plastic_specular = { 0.7, 0.6, 0.6 }; GLfloat red_plastic_shininess = 32.0f;
@@ -175,6 +177,8 @@ enum {
 	OCS, // Object Coordinate System
 	WCS // World Coordinate System
 } TransformMode;
+
+glm::vec3 dir;
 
 static bool moving_trackball = 0;
 static int last_mouse_pos_Y;
@@ -239,6 +243,7 @@ void init_light_object() {
 	obj.name = "light";
 	obj.M = glm::scale(glm::translate(glm::mat4(1), light.position), glm::vec3(0.2, 0.2, 0.2));
 	objects.push_back(obj);
+	distances.push_back(obj.M[3]);
 }
 
 void init_waving_plane() {
@@ -255,6 +260,7 @@ void init_waving_plane() {
 	obj4.name = "Waves";
 	obj4.M = glm::scale(glm::translate(glm::mat4(1), glm::vec3(0., -2., 0.)), glm::vec3(8., 8., 8.));
 	objects.push_back(obj4);
+	distances.push_back(obj4.M[3]);
 }
 
 void init_mesh() {
@@ -271,6 +277,7 @@ void init_mesh() {
 	obj4.M = glm::scale(glm::translate(glm::mat4(1), glm::vec3(0., 0., -2.)), glm::vec3(2., 2., 2.));
 
 	objects.push_back(obj4);
+	distances.push_back(obj4.M[3]);
 }
 
 
@@ -286,6 +293,7 @@ void init_sphere_FLAT() {
 	obj3.name = "Sphere FLAT";
 	obj3.M = glm::translate(glm::mat4(1), glm::vec3(3., 0., -6.));
 	objects.push_back(obj3);
+	distances.push_back(obj3.M[3]);
 }
 
 void init_sphere_SMOOTH() {
@@ -300,6 +308,7 @@ void init_sphere_SMOOTH() {
 	obj4.name = "Sphere SMOOTH";
 	obj4.M = glm::translate(glm::mat4(1), glm::vec3(6., 0., -3.));
 	objects.push_back(obj4);
+	distances.push_back(obj4.M[3]);
 }
 
 void init_axis() {
@@ -441,6 +450,16 @@ void initShader()
 	//Shader uniforms initialization
 	glUniform3f(light_uniforms[TOON].light_position_pointer, light.position.x, light.position.y, light.position.z);
 	glUniform4fv(glGetUniformLocation(shaders_IDs[TOON], "Color"), 1, value_ptr(glm::vec4(1.0, 1.0, 1.0, 1.0)));
+
+	// PASS THROUGH
+	shaders_IDs[PASS_THROUGH] = createProgram(ShaderDir + "v_passthrough.glsl", ShaderDir + "f_passthrough.glsl");
+	//Otteniamo i puntatori alle variabili uniform per poterle utilizzare in seguito
+	base_unif.P_Matrix_pointer = glGetUniformLocation(shaders_IDs[PASS_THROUGH], "P");
+	base_unif.V_Matrix_pointer = glGetUniformLocation(shaders_IDs[PASS_THROUGH], "V");
+	base_unif.M_Matrix_pointer = glGetUniformLocation(shaders_IDs[PASS_THROUGH], "M");
+	base_uniforms[ShadingType::PASS_THROUGH] = base_unif;
+	glUseProgram(shaders_IDs[PASS_THROUGH]);
+	glUniform4fv(glGetUniformLocation(shaders_IDs[PASS_THROUGH], "Color"), 1, value_ptr(glm::vec4(1.0, 1.0, 1.0, 1.0)));
 }
 
 void init() {
@@ -929,12 +948,15 @@ void moveCameraDown()
 	ViewSetup.target += glm::vec4(upDirection, 0.0);
 }
 
+
 void modifyModelMatrix(glm::vec3 translation_vector, glm::vec3 rotation_vector, GLfloat angle, GLfloat scale_factor) {
 	glm::mat4 M = objects[selected_obj].M;
 
 	// TRANSLATION
-	if(translation_vector.length() != 0) {
+	if(glm::length(translation_vector) != 0) {
 		M = glm::translate(M, translation_vector);
+
+		distances.at(selected_obj) = M[3];
 	}
 
 	// ROTATION
@@ -942,12 +964,9 @@ void modifyModelMatrix(glm::vec3 translation_vector, glm::vec3 rotation_vector, 
 		if(TransformMode == OCS) {
 			M = glm::rotate(M, glm::radians(angle), rotation_vector);
 		} else if(TransformMode == WCS) {
-			const glm::vec3 position = M[3];
-			const glm::vec3 origin = Axis.M[3];
-
-			M = glm::translate(M, position - origin);
+			M = glm::translate(M, -distances.at(selected_obj));
 			M = glm::rotate(M, glm::radians(angle), rotation_vector);
-			M = glm::translate(M, origin - position);
+			M = glm::translate(M, distances.at(selected_obj));
 		}
 	}
 
@@ -956,12 +975,9 @@ void modifyModelMatrix(glm::vec3 translation_vector, glm::vec3 rotation_vector, 
 		if(TransformMode == OCS) {
 			M = glm::scale(M, glm::vec3(scale_factor));
 		} else if(TransformMode == WCS) {
-			const glm::vec3 position = M[3];
-			const glm::vec3 origin = Axis.M[3];
-
-			M = glm::translate(M, position - origin);
+			M = glm::translate(M, -distances.at(selected_obj));
 			M = glm::scale(M, glm::vec3(scale_factor));
-			M = glm::translate(M, origin - position);
+			M = glm::translate(M, distances.at(selected_obj));
 		}
 	}
 
@@ -1205,6 +1221,8 @@ int main(int argc, char** argv) {
 
 	init();
 	initShader();
+
+	dir = glm::vec3(objects.at(objects.size() - 1).M[3] - Axis.M[3]);
 
 	buildOpenGLMenu();
 	refresh_monitor(16);
