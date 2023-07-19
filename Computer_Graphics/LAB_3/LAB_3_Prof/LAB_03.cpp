@@ -28,6 +28,7 @@ based on the OpenGL Shading Language (GLSL) specifications.
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/quaternion.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/string_cast.hpp>
 
@@ -964,6 +965,27 @@ void modifyModelMatrix(glm::vec3 translation_vector, glm::vec3 rotation_vector, 
 		if(TransformMode == OCS) {
 			M = glm::rotate(M, glm::radians(angle), rotation_vector);
 		} else if(TransformMode == WCS) {
+
+			/*
+			// SOLUZIONE CON QUATERNION - SE LA SI VUOLE PPROVARE LA SI DECOMMENTI E SI COMMENTI L'ALTRA SOLUZIONE
+
+			glm::quat quaternion;
+
+			if (rotation_vector.x == 1.0)
+				quaternion = glm::quat(glm::vec3(glm::radians(angle), glm::radians(0.0), glm::radians(0.0)));
+			else if(rotation_vector.y == 1.0)
+				quaternion = glm::quat(glm::vec3(glm::radians(0.0), glm::radians(angle), glm::radians(0.0)));
+			else if(rotation_vector.z == 1.0)
+				quaternion = glm::quat(glm::vec3(glm::radians(0.0), glm::radians(0.0), glm::radians(angle)));
+
+			glm::mat4 rotation = glm::toMat4(quaternion);
+			glm::mat4 Mt1 = glm::translate(glm::mat4(1.0), -distances.at(selected_obj));
+			glm::mat4 Mt2 = glm::translate(glm::mat4(1.0), distances.at(selected_obj));
+			
+			M = Mt1 * rotation * Mt2 * M;
+			*/
+
+			// SOLUZIONE SENZA QUATERNION
 			M = glm::translate(M, -distances.at(selected_obj));
 			M = glm::rotate(M, glm::radians(angle), rotation_vector);
 			M = glm::translate(M, distances.at(selected_obj));
